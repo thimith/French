@@ -172,3 +172,48 @@ const LESSONS = [
     ],
   },
 ];
+
+/* Word gym: practise words organised by vowel. Each word checks only the target vowel ('*' = other syllables). */
+const GYM_DATA = [
+  { k: 'i', l: 'I', ex: 'lit', col: '#ff7aa8', soft: '#ffe3ee', model: 'i',
+    tip: ['Big tight <b>smile</b> 😁', 'Tongue <b>high</b> and pushed forward', 'Short and sharp — never the relaxed English “ih”'],
+    short: [['si', 'if'], ['lit', 'bed'], ['dix', 'ten'], ['vie', 'life'], ['riz', 'rice'], ['ville', 'town']],
+    long: [['midi', 'noon', ['mi', 'di'], ['i', 'i']], ['ici', 'here', ['i', 'ci'], ['i', 'i']], ['ami', 'friend', ['a', 'mi'], ['*', 'i']], ['Paris', 'Paris', ['Pa', 'ris'], ['*', 'i']]] },
+  { k: 'e', l: 'É', ex: 'thé', col: '#ff9f43', soft: '#fff0dc', model: 'é',
+    tip: ['Smile, but a little <b>more open</b> than I 🙂', 'Keep it <b>pure</b>: thé is not “tay” — no slide to “ee”', 'Short and steady'],
+    short: [['thé', 'tea'], ['clé', 'key'], ['nez', 'nose'], ['les', 'the'], ['et', 'and'], ['blé', 'wheat']],
+    long: [['été', 'summer', ['é', 'té'], ['e', 'e']], ['café', 'coffee', ['ca', 'fé'], ['*', 'e']], ['bébé', 'baby', ['bé', 'bé'], ['e', 'e']], ['parler', 'to speak', ['par', 'ler'], ['*', 'e']]] },
+  { k: 'E', l: 'È', ex: 'mer', col: '#f7b733', soft: '#fff6d6', model: 'è',
+    tip: ['Open a bit <b>more</b> than É 😃', 'Like the “e” in English <i>bed</i>', 'Relaxed jaw, lips neutral'],
+    short: [['mer', 'sea'], ['père', 'father'], ['tête', 'head'], ['fête', 'party'], ['lait', 'milk'], ['sept', 'seven']],
+    long: [['merci', 'thanks', ['mer', 'ci'], ['E', '*']], ['forêt', 'forest', ['fo', 'rêt'], ['*', 'E']], ['après', 'after', ['a', 'près'], ['*', 'E']], ['maison', 'house', ['mai', 'son'], ['E', '*']]] },
+  { k: 'a', l: 'A', ex: 'chat', col: '#e8505b', soft: '#ffe2e4', model: 'a',
+    tip: ['Mouth <b>wide open</b> 😮', 'Tongue low, in the middle — bright “ah”', 'Not the dull English “uh”'],
+    short: [['la', 'the'], ['ça', 'that'], ['va', 'goes'], ['chat', 'cat'], ['plat', 'dish'], ['sac', 'bag']],
+    long: [['papa', 'dad', ['pa', 'pa'], ['a', 'a']], ['salade', 'salad', ['sa', 'lade'], ['a', 'a']], ['madame', 'madam', ['ma', 'dame'], ['a', 'a']], ['Canada', 'Canada', ['Ca', 'na', 'da'], ['a', 'a', 'a']]] },
+  { k: 'y', l: 'U', ex: 'tu', col: '#8b6cff', soft: '#e9e3ff', model: 'u',
+    tip: ['Say “eee”, <b>freeze your tongue</b> 🧊', 'Push your lips into a <b>tiny kiss</b> 😗', 'Not “oo”, not “you”'],
+    short: [['tu', 'you'], ['vu', 'seen'], ['jus', 'juice'], ['bus', 'bus'], ['plus', 'more'], ['lune', 'moon']],
+    long: [['salut', 'hi', ['sa', 'lut'], ['*', 'y']], ['musique', 'music', ['mu', 'sique'], ['y', '*']], ['voiture', 'car', ['voi', 'ture'], ['*', 'y']], ['tortue', 'turtle', ['tor', 'tue'], ['*', 'y']]] },
+  { k: 'eu', l: 'EU', ex: 'deux', col: '#5c7cfa', soft: '#e2e8ff', model: 'eu',
+    tip: ['Say <b>É</b>, then <b>round your lips</b> 😙', 'Like U, but a bit more open', 'Lips forward, tongue stays front'],
+    short: [['deux', 'two'], ['peu', 'little'], ['bleu', 'blue'], ['feu', 'fire'], ['jeu', 'game'], ['yeux', 'eyes']],
+    long: [['cheveux', 'hair', ['che', 'veux'], ['*', 'eu']], ['joyeux', 'joyful', ['jo', 'yeux'], ['*', 'eu']], ['monsieur', 'sir', ['mon', 'sieur'], ['*', 'eu']], ['heureux', 'happy', ['heu', 'reux'], ['*', 'eu']]] },
+  { k: 'o', l: 'O', ex: 'beau', col: '#17a2b8', soft: '#d8f3f7', model: 'o',
+    tip: ['Round lips, tongue <b>back</b> ⭕', 'Keep it <b>pure</b>: beau is not “bow” — no slide to “oo”', 'Lips don’t move during the sound'],
+    short: [['beau', 'beautiful'], ['eau', 'water'], ['mot', 'word'], ['dos', 'back'], ['gros', 'big'], ['chaud', 'hot']],
+    long: [['vélo', 'bike', ['vé', 'lo'], ['*', 'o']], ['photo', 'photo', ['pho', 'to'], ['o', 'o']], ['bateau', 'boat', ['ba', 'teau'], ['*', 'o']], ['gâteau', 'cake', ['gâ', 'teau'], ['*', 'o']]] },
+  { k: 'u', l: 'OU', ex: 'vous', col: '#2ec4b6', soft: '#dcf7f4', model: 'ou',
+    tip: ['Round your lips <b>tight</b>, like blowing a candle 🕯️', 'Tongue pulled far <b>back</b>', 'English “food” is too far forward!'],
+    short: [['tout', 'all'], ['vous', 'you'], ['loup', 'wolf'], ['fou', 'crazy'], ['nous', 'we'], ['soupe', 'soup']],
+    long: [['bonjour', 'hello', ['bon', 'jour'], ['*', 'u']], ['toujours', 'always', ['tou', 'jours'], ['u', 'u']], ['poulet', 'chicken', ['pou', 'let'], ['u', '*']], ['couper', 'to cut', ['cou', 'per'], ['u', '*']]] },
+];
+const GYM = GYM_DATA.map((g) => ({
+  id: 'gym-' + g.k, gym: true, vowel: g.k, title: 'Le son ' + g.l, sub: g.ex, color: g.col, soft: g.soft, emoji: '🏋️', letter: g.l,
+  tip: { mouth: g.k, title: 'The French ' + g.l, lines: g.tip, model: g.model },
+  steps: [
+    { title: 'Hold the sound', items: [{ kind: 'sustain', say: g.l.toLowerCase().repeat(g.l.length > 1 ? 2 : 4), model: g.model, target: g.k, hint: 'Hold it steady for 2 seconds' }] },
+    { title: 'Short words', items: g.short.map(([w, en]) => ({ kind: 'word', w, en, v: [g.k] })) },
+    { title: 'Longer words', items: g.long.map(([w, en, syl, v]) => ({ kind: 'word', w, en, syl, v })) },
+  ],
+}));

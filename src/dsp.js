@@ -315,27 +315,21 @@ const DSP = (() => {
   }
 
   // ---------- speaker templates ----------
-  const DEFAULT_CAL = {
-    i: { F1: 300, F2: 2450, F3: 3150 },
-    a: { F1: 800, F2: 1400, F3: 2750 },
-    u: { F1: 330, F2: 800, F3: 2550 },
+  // Native French reference vowels (adult male averages, Hz: F1, F2, F3). Scaled to each speaker.
+  const REF = {
+    i: [280, 2250, 3000], e: [360, 2100, 2650], E: [520, 1800, 2550], a: [650, 1350, 2500],
+    y: [270, 1850, 2150], eu: [370, 1500, 2200], o: [380, 850, 2300], u: [300, 750, 2300],
+    // typical English-speaker substitutes
+    I: [400, 1950, 2600], // "ih" as in sit
+    Y: [310, 1400, 2250], // fronted English "oo" (goose) / under-fronted U
+    U: [440, 1050, 2400], // "oo" as in book
   };
-  function templates(cal) {
-    const c = cal || DEFAULT_CAL;
-    const { i, a, u } = c;
-    const T = {
-      i: { F1: i.F1, F2: i.F2, F3: i.F3 },
-      y: { F1: i.F1 * 1.02, F2: u.F2 + 0.66 * (i.F2 - u.F2), F3: i.F3 * 0.8 },
-      u: { F1: u.F1, F2: u.F2, F3: u.F3 },
-      I: { F1: i.F1 + 0.3 * (a.F1 - i.F1), F2: u.F2 + 0.82 * (i.F2 - u.F2), F3: i.F3 * 0.93 }, // English "ih" (sit)
-      Y: { F1: u.F1 * 1.04, F2: u.F2 + 0.38 * (i.F2 - u.F2), F3: (u.F3 + i.F3 * 0.8) / 2 }, // central "oo" (English goose)
-      U: { F1: u.F1 + 0.32 * (a.F1 - u.F1), F2: u.F2 * 1.25, F3: u.F3 }, // English "oo" in book
-      a: { F1: a.F1, F2: a.F2, F3: a.F3 },
-      e: { F1: i.F1 + 0.5 * (a.F1 - i.F1), F2: a.F2 + 0.6 * (i.F2 - a.F2), F3: i.F3 * 0.92 },
-    };
-    return T;
-  }
+  const FR_KEYS = ['i', 'e', 'E', 'a', 'y', 'eu', 'o', 'u'];
+  const ERR_KEYS = ['I', 'Y', 'U'];
+  const ROUNDED = { y: 1, eu: 1, o: 1, u: 1, Y: 1, U: 1 };
+  const DEFAULT_CAL = null;
   const W = { F1: 0.45, F2: 1.0, F3: 0.45 };
+  const fobj = (v) => ({ F1: v[0], F2: v[1], F3: v[2] });
   function vowelDistance(f, t) {
     let d = 0;
     d += Math.pow(W.F1 * Math.log(f.F1 / t.F1), 2);
@@ -343,18 +337,78 @@ const DSP = (() => {
     if (!isNaN(f.F3) && t.F3) d += Math.pow(W.F3 * Math.log(f.F3 / t.F3), 2);
     return Math.sqrt(d);
   }
-  function classifyVowel(f, T) {
+  /** Speaker size factor (vocal tract length) from the calibration vowels. */
+  function speakerScale(cal) {
+    if (!cal || !cal.i || !cal.a) return 1.12;
+    const r = [cal.a.F3 / REF.a[2], cal.i.F2 / REF.i[1], cal.i.F3 / REF.i[2]].filter((x) => isFinite(x) && x > 0.7 && x < 1.6);
+    if (!r.length) return 1.12;
+    return Math.exp(r.reduce((s, x) => s + Math.log(x), 0) / r.length);
+  }
+  const tplCache = new Map();
+  function templates(cal) {
+    const key = cal ? JSON.stringify(cal) : 'none';
+    if (tplCache.has(key)) return tplCache.get(key);
+    const k = speakerScale(cal);
+    const T = {};
+    for (const v of Object.keys(REF)) T[v] = { F1: REF[v][0] * k, F2: REF[v][1] * k, F3: REF[v][2] * k };
+    if (cal) {
+      // measurement bias (mic + analysis), estimated from the calibration vowels that look right
+      const bias = [0, 0, 0], n = [0, 0, 0];
+      for (const v of ['i', 'a', 'u']) {
+        const m = cal[v];
+        if (!m || vowelDistance(m, T[v]) > 0.3) continue;
+        ['F1', 'F2', 'F3'].forEach((F, j) => { if (isFinite(m[F])) { bias[j] += Math.log(m[F] / T[v][F]); n[j]++; } });
+      }
+      const b = bias.map((x, j) => (n[j] ? Math.max(-0.18, Math.min(0.18, x / n[j])) : 0));
+      for (const v of Object.keys(T)) ['F1', 'F2', 'F3'].forEach((F, j) => (T[v][F] *= Math.exp(b[j])));
+      // the learner's own i / a / u replace the reference ONLY if they are already close to native
+      for (const v of ['i', 'a', 'u']) {
+        const m = cal[v];
+        if (m && isFinite(m.F1) && isFinite(m.F2) && vowelDistance(m, T[v]) < 0.12) T[v] = { F1: m.F1, F2: m.F2, F3: isFinite(m.F3) ? m.F3 : T[v].F3 };
+      }
+    }
+    tplCache.set(key, T);
+    return T;
+  }
+  const keysFor = (target) => (['i', 'y', 'u'].includes(target) ? FR_KEYS.concat(ERR_KEYS) : FR_KEYS);
+  function classifyVowel(f, T, keys) {
+    keys = keys || Object.keys(T);
     let best = null, bestD = Infinity;
-    const scores = {};
-    let z = 0;
-    for (const k of Object.keys(T)) {
+    const dists = {};
+    for (const k of keys) {
       const d = vowelDistance(f, T[k]);
-      scores[k] = Math.exp(-(d * d) / (2 * 0.1 * 0.1));
-      z += scores[k];
+      dists[k] = d;
       if (d < bestD) { bestD = d; best = k; }
     }
-    for (const k of Object.keys(scores)) scores[k] /= z || 1;
-    return { label: best, dist: bestD, probs: scores };
+    return { label: best, dist: bestD, dists };
+  }
+  // ---------- strictness ----------
+  let PASS_D = 0.14; // distance from the native target that still counts as a pass
+  const STRICT = { easy: 0.19, normal: 0.14, strict: 0.105 };
+  let R_MIN = 5;
+  function setStrictness(level) {
+    PASS_D = STRICT[level] || STRICT.normal;
+    R_MIN = level === 'easy' ? 3 : level === 'strict' ? 7 : 5;
+  }
+  /** 0–100 score: 70 exactly at the pass distance; capped if another vowel is nearer. */
+  function vowelScore(c, target) {
+    const d = c.dists[target];
+    const sigma = PASS_D / Math.sqrt(-Math.log(0.7));
+    let sc = 100 * Math.exp(-Math.pow(d / sigma, 2));
+    if (d < PASS_D * 0.45) sc = Math.max(sc, 97);
+    if (c.label !== target) sc = Math.min(sc, 60);
+    return Math.round(sc);
+  }
+  /** Articulation hints: compare what was said with the target. */
+  function articulation(f, target, T) {
+    const t = T[target];
+    const hints = [];
+    const d1 = Math.log(f.F1 / t.F1), d2 = Math.log(f.F2 / t.F2);
+    if (d1 > 0.13) hints.push('close');
+    else if (d1 < -0.15) hints.push('open');
+    if (d2 > 0.09) hints.push('back');
+    else if (d2 < -0.09) hints.push('front');
+    return hints;
   }
 
   // ---------- frame categorisation ----------
@@ -428,9 +482,17 @@ const DSP = (() => {
   }
 
   // ---------- vowel evaluation ----------
+  function glideCheck(target, frames, T) {
+    if (frames.length < 8) return false;
+    const q = Math.max(2, Math.floor(frames.length / 4));
+    const s = (k) => median(frames.slice(0, q).map((x) => x[k])), e = (k) => median(frames.slice(-q).map((x) => x[k]));
+    if (target === 'y') return s('F2') > e('F2') * 1.35 && s('F2') > T.y.F2 * 1.05; // English "you"
+    if (target === 'e') return e('F2') > s('F2') * 1.12 && e('F1') < s('F1') * 0.85; // English "day" (é→ee)
+    if (target === 'o') return s('F2') > e('F2') * 1.22; // English "go" (o→oo)
+    return false;
+  }
   /**
    * expected: array of vowel targets, e.g. ['y'] or ['*','y'] ('*' = not checked)
-   * returns {ok, score, syllables:[{target, got, score, ok}], heard}
    */
   function evalVowels(A, expected, cal) {
     const T = templates(cal);
@@ -441,59 +503,50 @@ const DSP = (() => {
       const n = chosen[k];
       if (!n) return { target, got: null, score: target === '*' ? 100 : 0, ok: target === '*' };
       const f = { F1: n.F1, F2: n.F2, F3: n.F3 };
-      const c = classifyVowel(f, T);
-      let glide = false;
-      if (target === 'y' && n.frames.length >= 8) {
-        const q = Math.max(2, Math.floor(n.frames.length / 4));
-        const f2s = median(n.frames.slice(0, q).map((x) => x.F2));
-        const f2e = median(n.frames.slice(-q).map((x) => x.F2));
-        if (f2s > f2e * 1.35 && f2s > T.y.F2 * 1.05) glide = true; // English "you" slide
-      }
-      if (target === '*') return { target, got: c.label, score: 100, ok: true, f };
-      const p = c.probs[target] || 0;
-      let score = Math.round(100 * Math.min(1, p / 0.55));
-      if (c.label === target) score = Math.max(score, 72);
+      if (target === '*') return { target, got: classifyVowel(f, T, FR_KEYS).label, score: 100, ok: true, f };
+      const c = classifyVowel(f, T, keysFor(target));
+      const glide = glideCheck(target, n.frames, T);
+      let score = vowelScore(c, target);
       if (glide) score = Math.min(score, 55);
-      return { target, got: c.label, score, ok: score >= 70, glide, f };
+      return { target, got: c.label, dist: c.dists[target], score, ok: score >= 70, glide, f, hints: articulation(f, target, T) };
     });
     const checked = syl.filter((s) => s.target !== '*');
     const score = checked.length ? Math.round(checked.reduce((s, x) => s + x.score, 0) / checked.length) : 100;
     return { heard: true, score, syllables: syl, nucleiCount: nu.length };
   }
 
-  /** Sustained vowel or glide: per-frame classification. target 'y' or glide 'iy' */
+  /** Sustained vowel or glide ('iy'): per-frame distance to the target. */
   function evalSustained(A, target, cal) {
     const T = templates(cal);
     const vf = A.frames.filter((f) => isVowelFrame(f, A));
     if (vf.length < 8) return { heard: false, score: 0 };
-    const labs = vf.map((f) => classifyVowel(f, T).label);
-    // median-like smoothing (majority over 5)
-    const sm = labs.map((l, i) => {
-      const cnt = {};
-      for (let k = -2; k <= 2; k++) if (labs[i + k]) cnt[labs[i + k]] = (cnt[labs[i + k]] || 0) + 1;
-      return Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+    const tg = target === 'iy' ? ['i', 'y'] : [target];
+    const keys = keysFor(tg[tg.length - 1]);
+    // smooth formants over 5 frames, then classify
+    const sm = vf.map((f, i) => {
+      const w = vf.slice(Math.max(0, i - 2), i + 3);
+      return { F1: median(w.map((x) => x.F1)), F2: median(w.map((x) => x.F2)), F3: median(w.filter((x) => !isNaN(x.F3)).map((x) => x.F3)) };
     });
-    const tally = (arr) => { const c = {}; arr.forEach((l) => (c[l] = (c[l] || 0) + 1)); return c; };
-    if (target.length === 2) {
-      const q = Math.floor(sm.length * 0.4);
-      const first = sm.slice(0, q), last = sm.slice(-q);
-      const s1 = first.filter((l) => l === target[0]).length / first.length;
-      const s2 = last.filter((l) => l === target[1]).length / last.length;
-      const t1 = tally(first), t2 = tally(last);
-      const top = (t) => Object.keys(t).sort((a, b) => t[b] - t[a])[0];
-      return {
-        heard: true, score: Math.round(100 * Math.min(1, (s1 + s2) / 2 / 0.6)),
-        parts: [{ target: target[0], got: top(t1), share: s1 }, { target: target[1], got: top(t2), share: s2 }],
-        track: vf.map((f, i) => ({ F1: f.F1, F2: f.F2, l: sm[i] })),
-      };
+    const cls = sm.map((f) => classifyVowel(f, T, keys));
+    const hit = (c, t) => c.label === t && c.dists[t] < PASS_D * 1.1;
+    const tally = (arr) => { const c = {}; arr.forEach((x) => (c[x.label] = (c[x.label] || 0) + 1)); return c; };
+    const top = (t) => Object.keys(t).sort((a, b) => t[b] - t[a])[0];
+    const medF = (arr) => ({ F1: median(arr.map((x) => x.F1)), F2: median(arr.map((x) => x.F2)), F3: median(arr.filter((x) => !isNaN(x.F3)).map((x) => x.F3)) });
+    const track = vf.map((f, i) => ({ F1: sm[i].F1, F2: sm[i].F2, l: cls[i].label }));
+    if (tg.length === 2) {
+      const q = Math.floor(cls.length * 0.4);
+      const parts = [[cls.slice(0, q), sm.slice(0, q), tg[0]], [cls.slice(-q), sm.slice(-q), tg[1]]].map(([c, f, t]) => {
+        const share = c.filter((x) => hit(x, t)).length / c.length;
+        const mf = medF(f);
+        return { target: t, got: top(tally(c)), share, score: Math.round(100 * Math.min(1, share / 0.75)), f: mf, hints: articulation(mf, t, T) };
+      });
+      return { heard: true, score: Math.min(parts[0].score, parts[1].score), parts, track };
     }
-    const share = sm.filter((l) => l === target).length / sm.length;
-    const t = tally(sm);
-    const others = Object.keys(t).filter((k) => k !== target).sort((a, b) => t[b] - t[a]);
-    return {
-      heard: true, share, score: Math.round(100 * Math.min(1, share / 0.6)),
-      got: share >= 0.5 ? target : others[0], track: vf.map((f, i) => ({ F1: f.F1, F2: f.F2, l: sm[i] })),
-    };
+    const share = cls.filter((x) => hit(x, target)).length / cls.length;
+    const mf = medF(sm);
+    const others = tally(cls.filter((x) => !hit(x, target)));
+    const got = share >= 0.5 ? target : top(others) || classifyVowel(mf, T, keys).label;
+    return { heard: true, share, score: Math.round(100 * Math.min(1, share / 0.75)), got, f: mf, hints: articulation(mf, target, T), track };
   }
 
   // ---------- R detection ----------
@@ -549,7 +602,7 @@ const DSP = (() => {
    * Returns {kind: 'french'|'english'|'rolled'|'weak'|'silent', score, stats}
    */
   function evalR(A, x, cal) {
-    const c = cal || DEFAULT_CAL;
+    const c = { a: templates(cal).a };
     const gate = speechGate(A);
     const fr = A.frames;
     const speech = fr.filter((f) => f.rms > gate);
@@ -570,9 +623,10 @@ const DSP = (() => {
     const t0 = speech[0].t, t1 = speech[speech.length - 1].t;
     const trill = trillCount(x, A.fs, t0, Math.max(t0, t1 - 0.15));
     const stats = { engBest, fricBest, fricTotal, trill, speechFrames: speech.length, f3thr: Math.round(f3thr) };
-    if (engBest >= 4) return { kind: 'english', score: 20, stats };
-    if (fricBest >= 3) return { kind: 'french', score: Math.min(100, 78 + fricBest * 3), stats };
+    if (engBest >= 3) return { kind: 'english', score: 20, stats };
+    if (fricBest >= R_MIN) return { kind: 'french', score: Math.min(100, 72 + (fricBest - R_MIN) * 4), stats };
     if (trill >= 2) return { kind: 'rolled', score: 40, stats };
+    if (fricBest >= 2) return { kind: 'weak', score: 50, stats };
     return { kind: 'weak', score: 45, stats };
   }
 
@@ -582,7 +636,7 @@ const DSP = (() => {
     if (r.kind === 'silent') return r;
     const share = r.stats.fricTotal / Math.max(1, r.stats.speechFrames);
     r.share = share;
-    if (r.kind === 'french') r.score = Math.round(100 * Math.min(1, share / 0.45));
+    if (r.kind === 'french') r.score = Math.round(100 * Math.min(1, share / 0.6));
     if (r.kind === 'french' && r.score < 70) r.kind = 'weak';
     return r;
   }
@@ -600,13 +654,33 @@ const DSP = (() => {
       f0: median(mid.map((f) => f.f0)),
     };
   }
+  /** Check one tune-up vowel. Returns {ok, msg}. Order: a, then i, then u. */
+  function checkCalVowel(k, v, cal) {
+    if (!v) return { ok: false, msg: 'I didn’t hear a long, steady sound. Hold it for 2 seconds.' };
+    if (k === 'a') {
+      if (v.F1 < 520 || v.F1 / v.F2 < 0.4) return { ok: false, msg: 'Not open enough. Drop your jaw wide: <b>“aaah”</b>, like at the doctor.' };
+      return { ok: true };
+    }
+    const a = cal.a;
+    if (k === 'i') {
+      if (v.F1 > a.F1 * 0.62) return { ok: false, msg: 'Too open — that’s closer to “eh”. Close your mouth and smile: <b>“eeee”</b>.' };
+      if (v.F2 < a.F2 * 1.6) return { ok: false, msg: 'Too relaxed (like English “ih” in <i>sit</i>). <b>Big tight smile</b>, tongue pushed forward: “eeee”.' };
+      return { ok: true };
+    }
+    if (k === 'u') {
+      if (v.F2 > a.F2 * 0.78) return { ok: false, msg: 'That was an <b>English “oo”</b> — the tongue is too far forward. Round your lips tight like blowing out a candle 🕯️ and pull your tongue <b>back</b>: “ouuu”.' };
+      if (v.F1 > a.F1 * 0.65) return { ok: false, msg: 'Too open. Close and round your lips more: “ouuu”.' };
+      return { ok: true };
+    }
+    return { ok: true };
+  }
   function validCalibration(c) {
-    return c && c.i && c.a && c.u && c.i.F2 > c.u.F2 * 1.7 && c.a.F1 > c.i.F1 * 1.5 && c.a.F1 > c.u.F1 * 1.4 && !isNaN(c.i.F3);
+    return !!(c && c.a && c.i && c.u && checkCalVowel('i', c.i, c).ok && checkCalVowel('u', c.u, c).ok && checkCalVowel('a', c.a, c).ok);
   }
 
   return {
     setLagWidth: (b) => (LAGW = b), analyze, liveFrame, templates, classifyVowel, evalVowels, evalSustained, evalR, evalRSustained,
-    calibrationVowel, validCalibration, nuclei, DEFAULT_CAL, isVowelFrame, speechGate, median,
+    calibrationVowel, validCalibration, checkCalVowel, setStrictness, keysFor, FR_KEYS, ROUNDED, PASS: () => PASS_D, nuclei, DEFAULT_CAL, isVowelFrame, speechGate, median,
   };
 })();
 if (typeof module !== 'undefined') module.exports = DSP;

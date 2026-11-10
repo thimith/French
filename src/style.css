@@ -130,3 +130,22 @@ canvas.map{width:100%;height:auto;display:block;border-radius:22px;background:li
 .muted{color:var(--ink2)}
 @media (max-width:380px){.word{font-size:46px}.multi .w{font-size:32px}.sentence{font-size:25px}.lesson .em{font-size:36px}.lesson .t{font-size:19px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+.calsteps .cs.fail{background:var(--bad);color:#fff;transform:scale(1.15);animation:wob .5s ease}
+.failcard{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#ffe1e7;border:3px solid var(--bad);border-radius:20px;padding:14px 16px;margin:6px 0 10px;animation:inUp .4s cubic-bezier(.2,1.6,.4,1) both}
+.failcard .fx{flex:0 0 44px;height:44px;border-radius:50%;background:var(--bad);color:#fff;font-size:26px;font-weight:700;display:grid;place-items:center}
+.failcard b{font-size:19px;color:#b0173a}
+.failcard p{margin:4px 0 0;font-size:16px;line-height:1.4;color:#5a2333}
+.failcard .small{font-size:14px;opacity:.85}
+.okcard{background:#d7f7ea;color:#0f8a5f;border-radius:16px;padding:10px 14px;font-size:18px;font-weight:600;margin:6px 0 10px;animation:inUp .4s both}
+.seg{display:inline-flex;background:#ffffffaa;border-radius:999px;padding:4px;gap:2px;font-size:14px}
+.seg button{padding:6px 12px;border-radius:999px;color:var(--ink2)}
+.seg button.on{background:var(--accent);color:#fff}
+.gymgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gv{aspect-ratio:1/1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,#fff 0 8%,transparent 30%),var(--soft);box-shadow:inset 0 0 0 3px var(--col);animation:floaty 4s ease-in-out infinite;transition:transform .2s}
+.gv:nth-child(odd){animation-delay:-2s}
+.gv:active{transform:scale(.92)}
+.gv .l{font-size:24px;font-weight:700;color:var(--col);line-height:1}
+.gv .x{font-size:12px;color:var(--ink2);margin-top:3px}
+.gv .st{font-size:10px;color:var(--col);letter-spacing:1px}
+h3.sec{margin:22px 4px 10px;font-size:20px}
+h3.sec small{font-weight:400;color:var(--ink2);font-size:14px;margin-left:6px}

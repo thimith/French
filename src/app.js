@@ -6,11 +6,12 @@
 
   // ================= storage =================
   const Store = {
-    data: { cal: null, prog: {}, muted: false, numbers: false },
+    data: { cal: null, prog: {}, muted: false, numbers: false, level: 'normal' },
     load() { try { const d = JSON.parse(localStorage.getItem('bulles-v1') || 'null'); if (d) Object.assign(this.data, d); } catch (e) {} },
     save() { try { localStorage.setItem('bulles-v1', JSON.stringify(this.data)); } catch (e) {} },
   };
   Store.load();
+  DSP.setStrictness(Store.data.level);
 
   // ================= audio context + sound effects =================
   let ctx = null;
@@ -177,7 +178,9 @@
   }
 
   // ================= feedback text =================
-  const VNAME = { i: 'I', y: 'U', u: 'OU', I: 'English “ih”', Y: 'English “oo”', U: '“oo” (book)', e: 'É', a: 'A' };
+  const VNAME = { i: 'I', y: 'U', u: 'OU', I: 'English “ih”', Y: 'English “oo”', U: '“oo” (book)', e: 'É', E: 'È', a: 'A', eu: 'EU', o: 'O' };
+  const HINT = { close: 'close your mouth a little more (jaw up)', open: 'open your mouth a bit more', back: 'pull your tongue further back', front: 'push your tongue more forward', round: 'round your lips more 😗', spread: 'spread your lips — no rounding 😁' };
+  const GLIDE = { e: 'You slid into “ee”, like English “day”. Keep É <b>pure and steady</b> — no slide.', o: 'You slid into “oo”, like English “go”. Keep O <b>pure</b> — lips stay still.' };
   const FB = {
     y: {
       u: 'That was <b>OU</b> (like “food”). Keep the kiss, but push your tongue <b>forward</b>, like for I.',
@@ -223,10 +226,23 @@
 
   // ================= evaluation =================
   const cal = () => Store.data.cal;
-  function vowelPart(target, got, score, glide, syl) {
+  function vowelPart(target, got, score, glide, syl, hints) {
     const ok = score >= 70;
     let msg = '';
-    if (!ok) msg = glide ? FB.y.glide : (got && FB[target] && FB[target][got]) || (got ? `That sounded like <b>${VNAME[got] || got}</b>. Try again!` : 'I couldn’t catch that vowel — try again, a bit louder.');
+    if (!ok) {
+      if (glide) msg = target === 'y' ? FB.y.glide : GLIDE[target] || 'Keep the sound steady — no slide.';
+      else if (!got) msg = 'I couldn’t catch that vowel — try again, a bit louder.';
+      else if (got === target) msg = `Close, but not quite a native <b>${VNAME[target]}</b> yet.`;
+      else if (FB[target] && FB[target][got]) msg = FB[target][got];
+      else msg = `That sounded closer to <b>${VNAME[got] || got}</b>.`;
+      if (!glide && got && !(FB[target] && FB[target][got])) {
+        const h = (hints || []).slice();
+        const R = DSP.ROUNDED;
+        if (R[target] && !R[got]) h.unshift('round');
+        if (!R[target] && R[got]) h.unshift('spread');
+        if (h.length) msg += ' Try to ' + h.slice(0, 2).map((x) => HINT[x]).join(', and ') + '.';
+      }
+    }
     return { type: 'vowel', target, got, score, ok, msg, syl };
   }
   function evalWord(it, rec) {
@@ -236,11 +252,11 @@
     let dbg = { nuclei: DSP.nuclei(A).map((n) => [n.F1, n.F2, n.F3].map(Math.round)) };
     if (it.v) {
       const ev = DSP.evalVowels(A, it.v, cal());
-      dbg.vowels = ev.syllables.map((s) => ({ t: s.target, g: s.got, sc: s.score, f: s.f && [s.f.F1, s.f.F2, s.f.F3].map(Math.round), glide: s.glide }));
+      dbg.vowels = ev.syllables.map((s) => ({ t: s.target, g: s.got, sc: s.score, dist: s.dist, f: s.f && [s.f.F1, s.f.F2, s.f.F3].map(Math.round), glide: s.glide }));
       ev.syllables.forEach((s, k) => {
         const syl = syls[k] || syls[syls.length - 1];
         if (s.target === '*') parts.push({ type: 'skip', syl });
-        else parts.push(vowelPart(s.target, s.got, s.score, s.glide, syl));
+        else parts.push(vowelPart(s.target, s.got, s.score, s.glide, syl, s.hints));
       });
     } else syls.forEach((syl) => parts.push({ type: 'skip', syl }));
     if (it.r) {
@@ -264,13 +280,13 @@
       if (!ev.heard) parts.push({ type: 'vowel', target: 'y', got: null, score: 0, ok: false, msg: 'I couldn’t hear a long enough sound. Hold it for about 2 seconds.', syl: 'i → u' });
       else {
         track = ev.track;
-        ev.parts.forEach((p, k) => parts.push(vowelPart(p.target, p.got, Math.round(100 * Math.min(1, p.share / 0.6)), false, k ? 'uuu' : 'iii')));
+        ev.parts.forEach((p, k) => parts.push(vowelPart(p.target, p.got, p.score, false, k ? 'uuu' : 'iii', p.hints)));
       }
     } else {
       const ev = DSP.evalSustained(A, it.target, cal());
-      dbg.ev = { score: ev.score, share: ev.share, got: ev.got };
+      dbg.ev = { score: ev.score, share: ev.share, got: ev.got, f: ev.f };
       if (!ev.heard) parts.push({ type: 'vowel', target: it.target, got: null, score: 0, ok: false, msg: 'I couldn’t hear a long enough sound. Hold it for about 2 seconds.', syl: it.say });
-      else { track = ev.track; parts.push(vowelPart(it.target, ev.got, ev.score, false, it.say)); }
+      else { track = ev.track; parts.push(vowelPart(it.target, ev.got, ev.score, false, it.say, ev.hints)); }
     }
     const res = finalize(parts, rec, dbg);
     res.track = track;
@@ -353,22 +369,23 @@
   }
 
   // ================= vowel map =================
-  function VowelMap(canvas, target) {
+  const ZONES = {
+    i: { label: 'I', em: '😁', col: '#ff7aa8' }, e: { label: 'É', em: '🙂', col: '#ff9f43' }, E: { label: 'È', em: '😃', col: '#f7b733' },
+    a: { label: 'A', em: '😮', col: '#e8505b' }, y: { label: 'U', em: '😗', col: '#8b6cff' }, eu: { label: 'EU', em: '😙', col: '#5c7cfa' },
+    o: { label: 'O', em: '⭕', col: '#17a2b8' }, u: { label: 'OU', em: '🕯️', col: '#2ec4b6' },
+  };
+  function VowelMap(canvas, target, all) {
     const T = DSP.templates(cal());
     const d = window.devicePixelRatio || 1;
-    const W = 400, H = 190;
+    const W = 400, H = all ? 260 : 190;
     canvas.width = W * d; canvas.height = H * d;
     const g = canvas.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0);
     const f2max = T.i.F2 * 1.2, f2min = T.u.F2 * 0.72;
-    const f1min = Math.min(T.i.F1, T.u.F1) * 0.62, f1max = Math.max(T.i.F1, T.u.F1) * 1.9;
+    const f1min = Math.min(T.i.F1, T.u.F1) * 0.62, f1max = all ? T.a.F1 * 1.25 : Math.max(T.i.F1, T.u.F1) * 1.9;
     const X = (f2) => 28 + ((Math.log(f2max) - Math.log(f2)) / (Math.log(f2max) - Math.log(f2min))) * (W - 56);
     const Y = (f1) => 30 + ((Math.log(f1) - Math.log(f1min)) / (Math.log(f1max) - Math.log(f1min))) * (H - 60);
-    const R = ((W - 56) * 0.11) / (Math.log(f2max) - Math.log(f2min));
-    const zones = [
-      { k: 'i', label: 'I', em: '😁', col: '#ff7aa8' },
-      { k: 'y', label: 'U', em: '😗', col: '#8b6cff' },
-      { k: 'u', label: 'OU', em: '🕯️', col: '#2ec4b6' },
-    ];
+    const R = ((W - 56) * DSP.PASS() * (all ? 0.75 : 0.85)) / (Math.log(f2max) - Math.log(f2min));
+    const zones = (all ? DSP.FR_KEYS : ['i', 'y', 'u']).map((k) => ({ k, ...ZONES[k] }));
     let trail = [], shots = [], dot = null, t0 = performance.now(), raf = 0, alive = true;
     function draw() {
       if (!alive) return;
@@ -385,7 +402,7 @@
         grd.addColorStop(0, '#ffffff'); grd.addColorStop(1, z.col + (isT ? '88' : '33'));
         g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fillStyle = grd; g.fill();
         g.lineWidth = isT ? 3 : 1.5; g.strokeStyle = z.col + (isT ? 'ff' : '66'); g.stroke();
-        g.textAlign = 'center'; g.font = '14px system-ui'; g.fillStyle = z.col; g.fillText(z.em, x, y - rr - 6);
+        if (!all) { g.textAlign = 'center'; g.font = '14px system-ui'; g.fillStyle = z.col; g.fillText(z.em, x, y - rr - 6); }
       }
       // past shots
       for (const s of shots) {
@@ -436,7 +453,7 @@
       mix: '<animate attributeName="rx" values="30;30;10;10;13;13;30" keyTimes="0;.2;.3;.55;.65;.9;1" dur="4.5s" repeatCount="indefinite"/><animate attributeName="ry" values="7;7;11;11;14;14;7" keyTimes="0;.2;.3;.55;.65;.9;1" dur="4.5s" repeatCount="indefinite"/>',
       r: '<animate attributeName="ry" values="10;12;10" dur=".5s" repeatCount="indefinite"/>',
     }[kind] || '';
-    const rx = { iy: 30, i: 30, mix: 30, r: 20 }[kind] || 26, ry = { iy: 7, i: 7, mix: 7, r: 10 }[kind] || 9;
+    const rx = { iy: 30, i: 30, mix: 30, r: 20, e: 27, E: 25, a: 21, y: 10, eu: 13, o: 13, u: 9 }[kind] || 26, ry = { iy: 7, i: 7, mix: 7, r: 10, e: 9, E: 13, a: 21, y: 10, eu: 12, o: 15, u: 11 }[kind] || 9;
     const throat = kind === 'r' ? `<g stroke="#ff9f43" stroke-width="3" fill="none" stroke-linecap="round">
         <path d="M70 150 q15 -8 30 0"><animate attributeName="opacity" values="1;.2;1" dur=".45s" repeatCount="indefinite"/></path>
         <path d="M64 160 q21 -10 42 0"><animate attributeName="opacity" values=".2;1;.2" dur=".45s" repeatCount="indefinite"/></path></g>
@@ -493,7 +510,12 @@
           <div class="em">${L.emoji}</div><div class="t">${L.title}</div><div class="s">${L.sub}</div>
           <div class="stars" style="color:${L.color}">${starStr(lessonStars(L))}</div></button>`).join('')}
       </div>
+      <h3 class="sec">🏋️ Word gym <small>practise words by vowel</small></h3>
+      <div class="gymgrid">
+        ${GYM.map((G) => `<button class="gv" data-gid="${G.id}" style="--col:${G.color};--soft:${G.soft}"><div class="l">${G.letter}</div><div class="x">${G.sub}</div><div class="st">${starStr(lessonStars(G))}</div></button>`).join('')}
+      </div>
       <div class="foot">
+        <div class="seg" id="lvl">${['easy', 'normal', 'strict'].map((l) => `<button data-l="${l}" class="${Store.data.level === l ? 'on' : ''}">${{ easy: '🙂 Easy', normal: '🎯 Normal', strict: '🧐 Strict' }[l]}</button>`).join('')}</div>
         <label class="toggle"><input type="checkbox" id="nums" ${Store.data.numbers ? 'checked' : ''}> Show the numbers (coach view)</label>
         <button class="toggle" id="reset">↺ Reset progress</button>
       </div>`);
@@ -505,6 +527,16 @@
       if (b.dataset.sure) { Store.data.prog = {}; Store.save(); Home(); toast('Progress reset.'); }
       else { b.dataset.sure = 1; b.textContent = 'Tap again to confirm'; }
     };
+    app.querySelectorAll('#lvl button').forEach((b) => b.onclick = () => {
+      Store.data.level = b.dataset.l; Store.save(); DSP.setStrictness(b.dataset.l); Sfx.tap();
+      app.querySelectorAll('#lvl button').forEach((x) => x.classList.toggle('on', x === b));
+      toast({ easy: 'Easy: friendlier grading for beginners.', normal: 'Normal: close to a native sound.', strict: 'Strict: native-level precision.' }[b.dataset.l]);
+    });
+    app.querySelectorAll('.gv').forEach((b) => b.onclick = () => {
+      Sfx.pop(); celebrate(b);
+      const G = GYM.find((x) => x.id === b.dataset.gid);
+      if (!cal()) CalNudge(G); else Lesson(G);
+    });
     app.querySelectorAll('.lesson').forEach((b) => b.onclick = () => {
       Sfx.pop(); celebrate(b);
       const L = LESSONS.find((x) => x.id === b.dataset.id);
@@ -523,24 +555,34 @@
   // ---------- calibration ----------
   function Calibrate(thenLesson) {
     const steps = [
-      { k: 'i', say: 'iiii', how: 'like in “s<b>ee</b>” — big smile 😁', model: 'i' },
-      { k: 'a', say: 'aaaa', how: 'like in “f<b>a</b>ther” — mouth open 😮', model: 'a' },
-      { k: 'u', say: 'ouuu', how: 'like in “f<b>oo</b>d” — round lips 🕯️', model: 'ou' },
+      { k: 'a', label: 'a', say: 'aaaa', how: 'mouth wide open, like “<b>ah</b>” at the doctor 😮', model: 'a' },
+      { k: 'i', label: 'i', say: 'iiii', how: 'like in “s<b>ee</b>” — big tight smile 😁', model: 'i' },
+      { k: 'u', label: 'ou', say: 'ouuu', how: 'round lips like blowing out a candle 🕯️ — tongue <b>back</b>', model: 'ou' },
     ];
     const res = {};
+    const fails = [0, 0, 0];
     let idx = 0;
     mount(`<div class="lhead"><button class="iconbtn" id="back">←</button><h2>Voice tune-up</h2></div>
       <div class="card center" id="cc">
-        <div class="calsteps">${steps.map((s, i) => `<div class="cs" id="cs${i}">${s.k === 'u' ? 'ou' : s.k}</div>`).join('')}</div>
+        <div class="calsteps">${steps.map((s, i) => `<div class="cs" id="cs${i}">${s.label}</div>`).join('')}</div>
+        <div id="calmsg"></div>
         <div class="word" id="csay"></div><div class="en" id="chow"></div>
         <div class="models"><button class="pill ghost small" id="cmodel">🔊 Hear it</button></div>
         <div class="micwrap"><button class="mic" id="mic"><span class="ring"></span><span class="ring"></span>🎤</button>
           <div class="level"><i id="lvl"></i></div><div class="miclabel" id="ml">Tap, then hold the sound for 2 seconds</div></div>
       </div>`);
     $('#back').onclick = () => Home();
-    const show = () => {
-      steps.forEach((s, i) => { $('#cs' + i).className = 'cs' + (i < idx ? ' done' : i === idx ? ' cur' : ''); });
+    const show = (failIdx) => {
+      steps.forEach((s, i) => { $('#cs' + i).className = 'cs' + (i === failIdx ? ' fail' : i < idx ? ' done' : i === idx ? ' cur' : ''); $('#cs' + i).textContent = i === failIdx ? '✗' : i < idx ? '✓' : s.label; });
       $('#csay').textContent = steps[idx].say; $('#chow').innerHTML = steps[idx].how;
+    };
+    const failCard = (msg) => {
+      fails[idx]++;
+      $('#calmsg').innerHTML = `<div class="failcard"><div class="fx">✗</div><div><b>Not quite — let’s redo “${steps[idx].say}”</b><p>${msg}</p>${fails[idx] >= 3 ? '<p class="small">Tip: tap 🔊 Hear it and copy the model. Exaggerate it!</p>' : ''}</div></div>`;
+      show(idx);
+      Sfx.bad(); wobble($('#cc'));
+      $('#ml').textContent = 'Tap 🎤 and try again';
+      setTimeout(() => { const c = $('#cs' + idx); if (c) { c.className = 'cs cur'; c.textContent = steps[idx].label; } }, 1800);
     };
     show();
     $('#cmodel').onclick = () => speak(steps[idx].model);
@@ -548,26 +590,23 @@
       if (Mic.recording) { Mic.stopNow(); return; }
       try { await Mic.ensure(); } catch (e) { micError(e); return; }
       Sfx.ready(); await sleep(160);
+      $('#calmsg').innerHTML = '';
       $('#mic').classList.add('rec'); $('#ml').textContent = 'Listening… hold it';
       const rec = await Mic.record({ maxSec: 3, minSec: 1.4, silenceStop: 0.5, onLive: (f) => { const l = $('#lvl'); if (l) l.style.width = f.level * 100 + '%'; } });
       const m = $('#mic'); if (!m) return;
       m.classList.remove('rec'); $('#lvl').style.width = '0';
-      const A = DSP.analyze(rec.samples, rec.fs);
-      const v = DSP.calibrationVowel(A);
-      if (!v) { wobble($('#cc')); Sfx.bad(); $('#ml').textContent = 'Hmm, I didn’t get a long sound. Try again — hold it for 2 seconds.'; return; }
+      const v = DSP.calibrationVowel(DSP.analyze(rec.samples, rec.fs));
+      const chk = DSP.checkCalVowel(steps[idx].k, v, res);
+      if (!chk.ok) return failCard(chk.msg);
       res[steps[idx].k] = v;
       Sfx.good(); celebrate($('#cs' + idx));
+      $('#calmsg').innerHTML = `<div class="okcard">✓ Great “${steps[idx].say}”!</div>`;
       idx++;
-      if (idx < steps.length) { show(); $('#ml').textContent = 'Nice! Next sound 👉 tap and hold'; return; }
-      if (!DSP.validCalibration(res)) {
-        Sfx.meh(); idx = 0; show();
-        $('#ml').innerHTML = 'Those didn’t sound different enough. Let’s redo it — exaggerate! Big smile for “iii”, wide open “aaa”, round “ouuu”.';
-        wobble($('#cc')); return;
-      }
+      if (idx < steps.length) { show(); $('#ml').textContent = 'Next sound 👉 tap and hold'; return; }
       Store.data.cal = res; Store.save();
       Sfx.great(); celebrate(null, true);
       $('#cc').innerHTML = `<div class="big-emoji">🎉</div><h2>Voice tuned!</h2>
-        <p class="muted">Here’s your personal vowel map. The bubbles are where <b>your</b> I, U and OU should land.</p>
+        <p class="muted">Here’s your personal vowel map. The bubbles are where a <b>native</b> I, U and OU land for your voice.</p>
         <div class="viz"><canvas class="map" id="map"></canvas></div>
         ${Store.data.numbers ? `<div class="numbers">${JSON.stringify(res, (k, v) => typeof v === 'number' ? Math.round(v) : v)}</div>` : ''}
         <div class="actions"><button class="pill" id="done">${thenLesson ? 'Start the lesson →' : 'Done'}</button></div>`;
@@ -586,7 +625,7 @@
     const session = {};
     let pos = -1; // -1 = tip
 
-    mount(`<div class="lhead"><button class="iconbtn" id="back">←</button><h2>${L.emoji} ${L.title}</h2>
+    mount(`<div class="lhead"><button class="iconbtn" id="back">←</button><h2>${L.gym ? '🏋️' : L.emoji} ${L.title}</h2>
       <button class="iconbtn" id="mute">${Store.data.muted ? '🔇' : '🔊'}</button></div>
       <div class="prog"><i id="bar"></i></div><div id="stage"></div>`);
     $('#back').onclick = () => { resetAccent(); Home(); };
@@ -653,7 +692,7 @@
         <div class="micwrap"><button class="mic" id="mic"><span class="ring"></span><span class="ring"></span>🎤</button>
           <div class="level"><i id="lvl"></i></div><div class="miclabel" id="ml">Tap the bubble and speak</div></div>
         <div class="result" id="res"></div></div>`;
-      const vm = needsMap ? VowelMap($('#map'), isMulti ? (words[0].v || []).filter((v) => v !== '*') : targets) : null;
+      const vm = needsMap ? VowelMap($('#map'), isMulti ? (words[0].v || []).filter((v) => v !== '*') : targets, !!L.gym) : null;
       if (vm) cleanup.push(vm.destroy);
       const modelText = () => (isMulti ? words[wi] ? words[wi].w : words.map((w) => w.w).join(', ') : it.kind === 'rsustain' ? 'ra, ri, rou' : it.model || it.w);
       $('#m1').onclick = () => speak(modelText());
@@ -662,7 +701,7 @@
         if (!vm || !isMulti) return;
         // rebuild map with the current word's target
         vm.destroy();
-        const nv = VowelMap($('#map'), (words[wi] ? words[wi].v || [] : []).filter((v) => v !== '*'));
+        const nv = VowelMap($('#map'), (words[wi] ? words[wi].v || [] : []).filter((v) => v !== '*'), !!L.gym);
         cleanup.push(nv.destroy);
         Object.assign(vm, nv);
       };
@@ -867,6 +906,6 @@
 
   // unlock audio on first touch (iOS)
   addEventListener('pointerdown', () => { try { audioCtx(); } catch (e) {} }, { once: true });
-  window.__bulles = { Store, Mic, DSP, LESSONS };
+  window.__bulles = { Store, Mic, DSP, LESSONS, GYM };
   Home();
 })();
