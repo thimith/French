@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#efeaff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Bulles · French pronunciation coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫧</text></svg>">
+<style>:root{
+  --ink:#2d2346; --ink2:#6b6187; --card:#ffffffee; --accent:#8b6cff; --soft:#e9e3ff;
+  --good:#22c58b; --mid:#ffb020; --bad:#ff5d7a; --r:26px;
+  font-family:'Fredoka','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;color:var(--ink);background:linear-gradient(160deg,#fff4fb 0%,#efeaff 45%,#e3f3ff 100%);background-attachment:fixed;overflow-x:hidden}
+body{min-height:100vh;min-height:100dvh}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+#bg{position:fixed;inset:0;overflow:hidden;z-index:0}
+.bub{position:absolute;bottom:-120px;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 30% 28%,#fff 0 9%,rgba(255,255,255,.55) 10% 18%,transparent 40%),radial-gradient(circle at 50% 50%,var(--c1) 0%,var(--c2) 100%);
+  box-shadow:inset 0 0 12px rgba(255,255,255,.7),0 4px 18px rgba(120,90,200,.12);opacity:.55;animation:rise linear infinite}
+.bub.pop{animation:popit .25s ease-out forwards!important}
+@keyframes rise{0%{transform:translate(0,0)}25%{transform:translate(18px,-28vh)}50%{transform:translate(-14px,-58vh)}75%{transform:translate(12px,-88vh)}100%{transform:translate(-6px,-125vh)}}
+@keyframes popit{to{transform:scale(1.6);opacity:0}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+#app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));pointer-events:none}
+#app>*{pointer-events:auto}
+.top{display:flex;align-items:center;justify-content:space-between;margin:4px 0 6px}
+.logo{font-size:34px;font-weight:700;letter-spacing:-.5px;background:linear-gradient(90deg,#8b6cff,#ff7aa8,#ff9f43);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo span{-webkit-text-fill-color:initial;margin-left:4px}
+.iconbtn{width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:0 4px 14px rgba(90,60,160,.12);font-size:20px;display:grid;place-items:center;transition:transform .15s}
+.iconbtn:active{transform:scale(.9)}
+.tag{margin:0 0 16px;color:var(--ink2);font-size:17px}
+.card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:0 10px 30px rgba(90,60,160,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin-bottom:16px;animation:inUp .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes inUp{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.wobble{animation:wob .5s ease}
+@keyframes wob{20%{transform:translateX(-8px) rotate(-1deg)}40%{transform:translateX(7px) rotate(1deg)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.calib{display:flex;align-items:center;gap:14px}
+.calib .em{font-size:38px}
+.calib p{margin:2px 0 0;color:var(--ink2);font-size:15px}
+.calib h3{margin:0;font-size:19px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:999px;font-size:17px;font-weight:600;background:var(--accent);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent);transition:transform .15s,filter .15s}
+.pill:active{transform:scale(.94)}
+.pill.ghost{background:#fff;color:var(--ink);box-shadow:0 3px 10px rgba(90,60,160,.12)}
+.pill.small{padding:8px 14px;font-size:15px}
+.pill[disabled]{filter:grayscale(1) opacity(.5)}
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lesson{position:relative;aspect-ratio:1/1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(circle at 30% 25%,#fff 0 6%,transparent 30%),radial-gradient(circle at 50% 60%,var(--soft),#fff);
+  box-shadow:inset 0 0 0 4px var(--col),0 12px 26px color-mix(in srgb,var(--col) 30%,transparent);animation:floaty 4s ease-in-out infinite,inUp .5s both;transition:transform .2s}
+.lesson:nth-child(2){animation-delay:-1s,.08s}.lesson:nth-child(3){animation-delay:-2s,.16s}.lesson:nth-child(4){animation-delay:-3s,.24s}
+.lesson:active{transform:scale(.94)}
+@keyframes floaty{50%{translate:0 -7px}}
+.lesson .em{font-size:44px;line-height:1}
+.lesson .t{font-size:22px;font-weight:700;margin-top:6px;color:var(--col)}
+.lesson .s{font-size:13px;color:var(--ink2);margin-top:2px}
+.stars{font-size:16px;letter-spacing:2px;margin-top:6px}
+.foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2);background:#ffffffaa;border-radius:999px;padding:8px 14px}
+/* lesson screen */
+.lhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.lhead h2{margin:0;font-size:22px;flex:1}
+.prog{height:12px;border-radius:99px;background:#ffffff99;overflow:hidden;margin-bottom:14px;box-shadow:inset 0 1px 3px rgba(0,0,0,.06)}
+.prog i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff));transition:width .5s cubic-bezier(.3,1.4,.5,1)}
+.steplabel{font-size:14px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.prompt{text-align:center}
+.word{font-size:56px;font-weight:700;line-height:1.1;margin:6px 0 2px;letter-spacing:.5px}
+.word.long{font-size:34px}
+.word .hl{color:var(--accent)}
+.en{color:var(--ink2);font-size:16px;min-height:20px}
+.hint{color:var(--ink2);font-size:15px;margin-top:8px}
+.models{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.multi{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:6px 0}
+.multi .w{font-size:40px;font-weight:700;padding:6px 14px;border-radius:18px;opacity:.4;transition:all .3s;position:relative}
+.multi .w.cur{opacity:1;background:var(--soft);transform:scale(1.08)}
+.multi .w.done{opacity:.85}
+.multi .w small{display:block;font-size:13px;font-weight:500;color:var(--ink2)}
+.multi .arrow{font-size:22px;opacity:.4}
+.multi .badge{position:absolute;top:-8px;right:-8px;font-size:20px}
+.viz{position:relative;margin:14px auto 4px;width:100%;max-width:420px}
+canvas.map{width:100%;height:auto;display:block;border-radius:22px;background:linear-gradient(180deg,#fbf9ff,#f3efff)}
+.vizcap{font-size:13px;color:var(--ink2);text-align:center;margin-top:6px}
+.rmeter{display:flex;justify-content:center;gap:6px}
+.rtype{flex:1 1 0;max-width:110px;text-align:center;padding:10px 6px;border-radius:18px;background:#f6f3ff;font-size:13px;color:var(--ink2);transition:all .3s}
+.rtype b{display:block;font-size:26px;margin-bottom:2px}
+.rtype.on{background:var(--good);color:#fff;transform:scale(1.08)}
+.rtype.on.badr{background:var(--bad)}
+.rtype.on.midr{background:var(--mid)}
+.micwrap{display:flex;flex-direction:column;align-items:center;margin-top:12px}
+.mic{position:relative;width:104px;height:104px;border-radius:50%;font-size:42px;color:#fff;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.7) 0 8%,transparent 30%),linear-gradient(145deg,var(--accent),color-mix(in srgb,var(--accent) 65%,#ff7aa8));
+  box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 45%,transparent);transition:transform .15s}
+.mic:active{transform:scale(.92)}
+.mic .ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--accent);opacity:0;pointer-events:none}
+.mic.rec{background:linear-gradient(145deg,#ff5d7a,#ff9f43)}
+.mic.rec .ring{animation:ring 1.2s ease-out infinite}
+.mic.rec .ring:nth-child(2){animation-delay:.4s}
+.mic.busy{filter:grayscale(.4);opacity:.7}
+@keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.8);opacity:0}}
+.miclabel{margin-top:10px;font-size:16px;color:var(--ink2);min-height:22px;text-align:center}
+.level{width:140px;height:8px;border-radius:9px;background:#eee8ff;margin-top:8px;overflow:hidden}
+.level i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c58b,#ffb020,#ff5d7a);transition:width .06s}
+.result{margin-top:16px;text-align:center}
+.score{display:inline-grid;place-items:center;width:92px;height:92px;border-radius:50%;font-size:30px;font-weight:700;color:#fff;animation:boing .6s cubic-bezier(.2,1.8,.4,1) both;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.6) 0 8%,transparent 30%),var(--sc,var(--good));box-shadow:0 10px 24px color-mix(in srgb,var(--sc,var(--good)) 40%,transparent)}
+@keyframes boing{from{transform:scale(.2)}to{transform:scale(1)}}
+.verdict{font-size:22px;font-weight:700;margin:10px 0 4px}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.chip{padding:8px 14px;border-radius:16px;font-size:18px;font-weight:600;background:#f1f0f5}
+.chip small{display:block;font-size:12px;font-weight:500;opacity:.85}
+.chip.ok{background:#d7f7ea;color:#0f8a5f}.chip.no{background:#ffe1e7;color:#c3264a}.chip.na{opacity:.55}
+.fb{background:#fff8e6;border-radius:18px;padding:12px 16px;font-size:16px;line-height:1.4;text-align:left;margin-top:8px}
+.fb.good{background:#e3fbf1}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.sentence{font-size:30px;font-weight:700;line-height:1.35;text-align:center;margin:8px 0}
+.sentence .f{color:var(--accent)}
+.sentence .sw{display:inline-block;padding:0 3px;border-radius:8px}
+.sentence .sw.ok{background:#d7f7ea}.sentence .sw.no{background:#ffe1e7;text-decoration:underline wavy #ff5d7a}
+.heard{font-size:15px;color:var(--ink2);margin-top:6px}
+/* tip */
+.tip{text-align:center}
+.tip h2{margin:4px 0 6px;font-size:26px}
+.face{width:170px;height:170px;margin:4px auto}
+.tiplines{text-align:left;list-style:none;padding:0;margin:12px 0 0}
+.tiplines li{font-size:18px;line-height:1.4;padding:10px 14px;margin:8px 0;border-radius:16px;background:var(--soft);opacity:0;animation:inUp .5s cubic-bezier(.2,1.4,.4,1) forwards}
+.big-emoji{font-size:64px;animation:boing .7s cubic-bezier(.2,1.8,.4,1) both}
+.summary{text-align:center}
+.bigstars{font-size:46px;letter-spacing:6px;margin:8px 0}
+.bigstars span{display:inline-block;animation:boing .6s cubic-bezier(.2,1.8,.4,1) both}
+.tricky{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+.numbers{font-family:ui-monospace,Menlo,monospace;font-size:11px;text-align:left;background:#1e1b2e;color:#c9f;padding:10px;border-radius:12px;white-space:pre-wrap;margin-top:12px;max-height:240px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2d2346;color:#fff;padding:12px 18px;border-radius:16px;font-size:15px;z-index:60;max-width:90vw;animation:inUp .3s both;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.calsteps{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.calsteps .cs{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:700;background:#f3efff;transition:all .3s}
+.calsteps .cs.cur{background:var(--accent);color:#fff;transform:scale(1.1)}
+.calsteps .cs.done{background:var(--good);color:#fff}
+.center{text-align:center}
+.muted{color:var(--ink2)}
+@media (max-width:380px){.word{font-size:46px}.multi .w{font-size:32px}.sentence{font-size:25px}.lesson .em{font-size:36px}.lesson .t{font-size:19px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<main id="app"></main>
+<canvas id="fx"></canvas>
+<script>/* ============================================================
+   Bulles — French pronunciation analysis engine (pure JS, no deps)
+   - LPC formant tracking (F1/F2/F3)
+   - Vowel classifier for French i / y / u + typical English-speaker errors
+   - R detector: French uvular R vs English R vs rolled R vs missing
+   - Syllable nucleus segmentation
+   ============================================================ */
+const DSP = (() => {
+  'use strict';
+
+  // ---------- basic helpers ----------
+  const median = (arr) => {
+    if (!arr.length) return NaN;
+    const s = Float64Array.from(arr).sort();
+    const m = s.length >> 1;
+    return s.length % 2 ? s[m] : 0.5 * (s[m - 1] + s[m]);
+  };
+  const percentile = (arr, p) => {
+    if (!arr.length) return 0;
+    const s = Float64Array.from(arr).sort();
+    return s[Math.min(s.length - 1, Math.max(0, Math.floor(p * (s.length - 1))))];
+  };
+  const hamming = (n) => {
+    const w = new Float64Array(n);
+    for (let i = 0; i < n; i++) w[i] = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (n - 1));
+    return w;
+  };
+  const nextPow2 = (n) => { let p = 1; while (p < n) p <<= 1; return p; };
+
+  // ---------- resampling ----------
+  function designLowpass(cutNorm, taps) {
+    const h = new Float64Array(taps), M = taps - 1;
+    let sum = 0;
+    for (let n = 0; n < taps; n++) {
+      const x = n - M / 2;
+      const sinc = x === 0 ? 2 * cutNorm : Math.sin(2 * Math.PI * cutNorm * x) / (Math.PI * x);
+      h[n] = sinc * (0.54 - 0.46 * Math.cos((2 * Math.PI * n) / M));
+      sum += h[n];
+    }
+    for (let n = 0; n < taps; n++) h[n] /= sum;
+    return h;
+  }
+  const lpCache = {};
+  function decimate(x, fs, targetFs) {
+    const factor = Math.max(1, Math.round(fs / targetFs));
+    if (factor === 1) return { y: Float64Array.from(x), fs };
+    const key = factor;
+    const h = lpCache[key] || (lpCache[key] = designLowpass(0.42 / factor, 8 * factor + 1));
+    const half = (h.length - 1) / 2;
+    const out = new Float64Array(Math.floor(x.length / factor));
+    for (let i = 0; i < out.length; i++) {
+      const c = i * factor;
+      let s = 0;
+      for (let k = 0; k < h.length; k++) {
+        const idx = c + half - k;
+        if (idx >= 0 && idx < x.length) s += h[k] * x[idx];
+      }
+      out[i] = s;
+    }
+    return { y: out, fs: fs / factor };
+  }
+
+  // ---------- LPC + polynomial roots ----------
+  let LAGW = 40;
+  function lpc(frame, order, fs = 11000) {
+    const n = frame.length, r = new Float64Array(order + 1);
+    for (let k = 0; k <= order; k++) {
+      let s = 0;
+      for (let i = k; i < n; i++) s += frame[i] * frame[i - k];
+      r[k] = s;
+    }
+    if (r[0] <= 1e-12) return null;
+    r[0] *= 1.0001;
+    // gentle lag window (reduces pitch-harmonic latching)
+    for (let k = 1; k <= order; k++) r[k] *= Math.exp(-0.5 * Math.pow((2 * Math.PI * LAGW * k) / fs, 2));
+    const a = new Float64Array(order + 1), tmp = new Float64Array(order + 1);
+    a[0] = 1;
+    let e = r[0];
+    for (let i = 1; i <= order; i++) {
+      let acc = r[i];
+      for (let j = 1; j < i; j++) acc += a[j] * r[i - j];
+      const k = -acc / e;
+      tmp.set(a);
+      for (let j = 1; j < i; j++) a[j] = tmp[j] + k * tmp[i - j];
+      a[i] = k;
+      e *= 1 - k * k;
+      if (e <= 0) return null;
+    }
+    return a;
+  }
+
+  // Durand–Kerner root finder for monic polynomial z^n + a1 z^(n-1) + ... + an
+  function polyRoots(a) {
+    const n = a.length - 1;
+    const re = new Float64Array(n), im = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const ang = (2 * Math.PI * i) / n + 0.4;
+      re[i] = 0.9 * Math.cos(ang);
+      im[i] = 0.9 * Math.sin(ang);
+    }
+    for (let it = 0; it < 120; it++) {
+      let maxd = 0;
+      for (let i = 0; i < n; i++) {
+        let pr = 1, pi = 0;
+        for (let k = 1; k <= n; k++) {
+          const nr = pr * re[i] - pi * im[i] + a[k];
+          pi = pr * im[i] + pi * re[i];
+          pr = nr;
+        }
+        let dr = 1, di = 0;
+        for (let j = 0; j < n; j++) {
+          if (j === i) continue;
+          const xr = re[i] - re[j], xi = im[i] - im[j];
+          const nr = dr * xr - di * xi;
+          di = dr * xi + di * xr;
+          dr = nr;
+        }
+        const den = dr * dr + di * di;
+        if (den < 1e-300) continue;
+        const qr = (pr * dr + pi * di) / den, qi = (pi * dr - pr * di) / den;
+        re[i] -= qr; im[i] -= qi;
+        const d = Math.abs(qr) + Math.abs(qi);
+        if (d > maxd) maxd = d;
+      }
+      if (maxd < 1e-9) break;
+    }
+    return { re, im };
+  }
+
+  function formantsFromLpc(a, fs, f0 = 0) {
+    const { re, im } = polyRoots(a);
+    const cands = [];
+    for (let i = 0; i < re.length; i++) {
+      if (im[i] <= 1e-3) continue;
+      const freq = (Math.atan2(im[i], re[i]) * fs) / (2 * Math.PI);
+      const mag = Math.hypot(re[i], im[i]);
+      const bw = (-Math.log(mag) * fs) / Math.PI;
+      if (freq > 180 && freq < fs / 2 - 200 && bw > 0 && bw < 1150) cands.push({ freq, bw });
+    }
+    cands.sort((x, y) => x.freq - y.freq);
+    // drop a low pole that just latched onto the 2nd pitch harmonic (common for higher voices)
+    if (f0 > 150) {
+      const low = cands.filter((c) => c.freq <= 1100);
+      const under = cands.filter((c) => c.freq <= 1700).length;
+      if (low.length >= 2 && under >= 3) {
+        const bad = low.find((c) => Math.abs(c.freq - 2 * f0) < 0.12 * 2 * f0);
+        if (bad) cands.splice(cands.indexOf(bad), 1);
+      }
+    }
+    // assign F1, F2, F3
+    let F1 = NaN, F2 = NaN, F3 = NaN, idx = 0, bwSum = 0;
+    for (; idx < cands.length; idx++) if (cands[idx].freq >= 180 && cands[idx].freq <= 1100 && cands[idx].bw < 400) { F1 = cands[idx].freq; bwSum += cands[idx].bw; idx++; break; }
+    if (!isNaN(F1)) {
+      for (; idx < cands.length; idx++) if (cands[idx].freq >= Math.max(F1 + 150, 550) && cands[idx].freq <= 3200 && cands[idx].bw < 700) { F2 = cands[idx].freq; bwSum += cands[idx].bw; idx++; break; }
+    }
+    if (!isNaN(F2)) {
+      for (; idx < cands.length; idx++) if (cands[idx].freq >= F2 + 150 && cands[idx].freq <= 4300) { F3 = cands[idx].freq; bwSum += cands[idx].bw; break; }
+    }
+    const quality = isNaN(F2) ? Infinity : bwSum + (isNaN(F3) ? 900 : 0);
+    return { F1, F2, F3, quality };
+  }
+
+  // ---------- FFT (radix-2, in place) ----------
+  function fft(re, im) {
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+    }
+    for (let len = 2; len <= n; len <<= 1) {
+      const ang = (-2 * Math.PI) / len, wr = Math.cos(ang), wi = Math.sin(ang);
+      for (let i = 0; i < n; i += len) {
+        let cr = 1, ci = 0;
+        for (let j = 0; j < len / 2; j++) {
+          const ur = re[i + j], ui = im[i + j];
+          const vr = re[i + j + len / 2] * cr - im[i + j + len / 2] * ci;
+          const vi = re[i + j + len / 2] * ci + im[i + j + len / 2] * cr;
+          re[i + j] = ur + vr; im[i + j] = ui + vi;
+          re[i + j + len / 2] = ur - vr; im[i + j + len / 2] = ui - vi;
+          const nr = cr * wr - ci * wi;
+          ci = cr * wi + ci * wr; cr = nr;
+        }
+      }
+    }
+  }
+
+  // ---------- pitch / voicing ----------
+  function voicingAt(y, start, win, fs) {
+    let mean = 0;
+    for (let i = 0; i < win; i++) mean += y[start + i];
+    mean /= win;
+    const minLag = Math.floor(fs / 500), maxLag = Math.min(Math.floor(fs / 70), win - 40);
+    let best = 0, bestLag = 0;
+    const rs = new Float64Array(maxLag + 2);
+    for (let lag = minLag; lag <= maxLag; lag++) {
+      let num = 0, e1 = 0, e2 = 0;
+      for (let i = 0; i < win - lag; i++) {
+        const a = y[start + i] - mean, b = y[start + i + lag] - mean;
+        num += a * b; e1 += a * a; e2 += b * b;
+      }
+      const r = num / (Math.sqrt(e1 * e2) + 1e-12);
+      rs[lag] = r;
+      if (r > best) { best = r; bestLag = lag; }
+    }
+    // avoid sub-harmonic (octave-down) errors: take the shortest lag that is a local peak close to the best
+    for (let lag = minLag + 1; lag < bestLag; lag++) {
+      if (rs[lag] >= 0.9 * best && rs[lag] >= rs[lag - 1] && rs[lag] >= rs[lag + 1]) { bestLag = lag; break; }
+    }
+    return { voicing: best, f0: bestLag ? fs / bestLag : 0 };
+  }
+
+  // double pre-emphasis (flattens the ~-12 dB/oct voice spectrum so F2/F3 are fitted well)
+  const preEmph1 = (y, n) => y[n] - 0.97 * (y[n - 1] || 0);
+  // try single and double pre-emphasis, keep the cleaner fit (narrower formant bandwidths)
+  function bestFormants(y, start, win, ham, buf, order, dfs, f0) {
+    let best = { F1: NaN, F2: NaN, F3: NaN, quality: Infinity };
+    for (const pe of [preEmph1, preEmph2]) {
+      for (let i = 0; i < win; i++) buf[i] = pe(y, start + i) * ham[i];
+      const a = lpc(buf, order, dfs);
+      if (!a) continue;
+      const f = formantsFromLpc(a, dfs, f0);
+      if (f.quality < best.quality) best = f;
+    }
+    return best;
+  }
+  const preEmph2 = (y, n) => {
+    const a = y[n] - 0.97 * (y[n - 1] || 0);
+    const b = (y[n - 1] || 0) - 0.97 * (y[n - 2] || 0);
+    return a - 0.97 * b;
+  };
+  // ---------- frame analysis ----------
+  /** Analyse a mono signal. Returns {frames, fs, peakRms, noiseRms}. */
+  function analyze(x, fs) {
+    const dec = decimate(x, fs, 11000);
+    const y = dec.y, dfs = dec.fs;
+    const hop = Math.round(dfs * 0.01), win = Math.round(dfs * 0.03);
+    const order = Math.min(16, Math.round(dfs / 1000) + 2);
+    const ham = hamming(win);
+    const buf = new Float64Array(win);
+    const N = nextPow2(Math.round(fs * 0.04));
+    const fre = new Float64Array(N), fim = new Float64Array(N);
+    const hamN = hamming(N);
+    const binHz = fs / N;
+    const frames = [];
+    for (let start = 2; start + win <= y.length; start += hop) {
+      const t = (start + win / 2) / dfs;
+      let s = 0;
+      for (let i = 0; i < win; i++) s += y[start + i] * y[start + i];
+      const rms = Math.sqrt(s / win);
+      const fr = { t, rms, voicing: 0, f0: 0, F1: NaN, F2: NaN, F3: NaN, centroid: 0, flat: 0, band: 0, zcr: 0 };
+      if (rms > 1e-5) {
+        const v = voicingAt(y, start, win, dfs);
+        fr.voicing = v.voicing; fr.f0 = v.f0;
+        const bf = bestFormants(y, start, win, ham, buf, order, dfs, v.voicing > 0.6 ? v.f0 : 0);
+        fr.F1 = bf.F1; fr.F2 = bf.F2; fr.F3 = bf.F3;
+        // full-rate spectrum for frication analysis
+        const c = Math.round(t * fs) - N / 2;
+        let zc = 0, prev = 0;
+        for (let i = 0; i < N; i++) {
+          const xv = c + i >= 0 && c + i < x.length ? x[c + i] : 0;
+          fre[i] = xv * hamN[i]; fim[i] = 0;
+          if (i && (xv >= 0) !== (prev >= 0)) zc++;
+          prev = xv;
+        }
+        fr.zcr = zc / N;
+        fft(fre, fim);
+        let num = 0, den = 0, logSum = 0, linSum = 0, cnt = 0, band = 0;
+        const lo = Math.floor(300 / binHz), hi = Math.min(N / 2 - 1, Math.floor(8000 / binHz));
+        const flo = Math.floor(1000 / binHz), fhi = Math.floor(4000 / binHz);
+        for (let k = lo; k <= hi; k++) {
+          const p = fre[k] * fre[k] + fim[k] * fim[k];
+          num += k * binHz * p; den += p;
+          if (k >= flo && k <= fhi) { logSum += Math.log(p + 1e-20); linSum += p; cnt++; }
+          if (k * binHz >= 700 && k * binHz <= 4000) band += p;
+        }
+        fr.centroid = den > 0 ? num / den : 0;
+        fr.band = den > 0 ? band / den : 0;
+        // local spectral flatness in 1–4 kHz: noise ≈ 0.5, harmonics ≪ 0.5 (independent of spectral shape)
+        const sb = Math.max(8, Math.round(375 / binHz));
+        let wsum = 0, fsum = 0;
+        for (let k0 = flo; k0 + sb <= fhi; k0 += sb) {
+          let lg = 0, ln = 0;
+          for (let k = k0; k < k0 + sb; k++) { const p = fre[k] * fre[k] + fim[k] * fim[k]; lg += Math.log(p + 1e-20); ln += p; }
+          if (ln <= 0) continue;
+          const fl = Math.exp(lg / sb) / (ln / sb);
+          wsum += ln; fsum += fl * ln;
+        }
+        fr.flat = wsum > 0 ? fsum / wsum : 0;
+      }
+      frames.push(fr);
+    }
+    const rmsArr = frames.map((f) => f.rms);
+    const peakRms = percentile(rmsArr, 0.97);
+    const noiseRms = Math.max(percentile(rmsArr, 0.1), 1e-5);
+    return { frames, fs, dfs, peakRms, noiseRms, duration: x.length / fs };
+  }
+
+  /** Fast single-frame formant estimate for live visuals (chunk = most recent samples). */
+  function liveFrame(chunk, fs) {
+    const dec = decimate(chunk, fs, 11000);
+    const y = dec.y, dfs = dec.fs;
+    const win = Math.min(y.length - 2, Math.round(dfs * 0.03));
+    if (win < 100) return null;
+    const start = y.length - win - 1;
+    if (start < 2) return null;
+    let s = 0;
+    for (let i = 0; i < win; i++) s += y[start + i] * y[start + i];
+    const rms = Math.sqrt(s / win);
+    const v = voicingAt(y, start, win, dfs);
+    const ham = hamming(win), buf = new Float64Array(win);
+    const f = bestFormants(y, start, win, ham, buf, Math.min(16, Math.round(dfs / 1000) + 2), dfs, v.voicing > 0.6 ? v.f0 : 0);
+    return { rms, voicing: v.voicing, ...f };
+  }
+
+  // ---------- speaker templates ----------
+  const DEFAULT_CAL = {
+    i: { F1: 300, F2: 2450, F3: 3150 },
+    a: { F1: 800, F2: 1400, F3: 2750 },
+    u: { F1: 330, F2: 800, F3: 2550 },
+  };
+  function templates(cal) {
+    const c = cal || DEFAULT_CAL;
+    const { i, a, u } = c;
+    const T = {
+      i: { F1: i.F1, F2: i.F2, F3: i.F3 },
+      y: { F1: i.F1 * 1.02, F2: u.F2 + 0.66 * (i.F2 - u.F2), F3: i.F3 * 0.8 },
+      u: { F1: u.F1, F2: u.F2, F3: u.F3 },
+      I: { F1: i.F1 + 0.3 * (a.F1 - i.F1), F2: u.F2 + 0.82 * (i.F2 - u.F2), F3: i.F3 * 0.93 }, // English "ih" (sit)
+      Y: { F1: u.F1 * 1.04, F2: u.F2 + 0.38 * (i.F2 - u.F2), F3: (u.F3 + i.F3 * 0.8) / 2 }, // central "oo" (English goose)
+      U: { F1: u.F1 + 0.32 * (a.F1 - u.F1), F2: u.F2 * 1.25, F3: u.F3 }, // English "oo" in book
+      a: { F1: a.F1, F2: a.F2, F3: a.F3 },
+      e: { F1: i.F1 + 0.5 * (a.F1 - i.F1), F2: a.F2 + 0.6 * (i.F2 - a.F2), F3: i.F3 * 0.92 },
+    };
+    return T;
+  }
+  const W = { F1: 0.45, F2: 1.0, F3: 0.45 };
+  function vowelDistance(f, t) {
+    let d = 0;
+    d += Math.pow(W.F1 * Math.log(f.F1 / t.F1), 2);
+    d += Math.pow(W.F2 * Math.log(f.F2 / t.F2), 2);
+    if (!isNaN(f.F3) && t.F3) d += Math.pow(W.F3 * Math.log(f.F3 / t.F3), 2);
+    return Math.sqrt(d);
+  }
+  function classifyVowel(f, T) {
+    let best = null, bestD = Infinity;
+    const scores = {};
+    let z = 0;
+    for (const k of Object.keys(T)) {
+      const d = vowelDistance(f, T[k]);
+      scores[k] = Math.exp(-(d * d) / (2 * 0.1 * 0.1));
+      z += scores[k];
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    for (const k of Object.keys(scores)) scores[k] /= z || 1;
+    return { label: best, dist: bestD, probs: scores };
+  }
+
+  // ---------- frame categorisation ----------
+  function speechGate(A) {
+    return Math.max(A.noiseRms * 3, A.peakRms * 0.06, 2e-4);
+  }
+  function isVowelFrame(fr, A) {
+    return fr.rms > Math.max(A.peakRms * 0.14, speechGate(A)) && fr.voicing > 0.6 && !isNaN(fr.F1) && !isNaN(fr.F2);
+  }
+
+  // ---------- syllable nuclei ----------
+  function nuclei(A) {
+    const fr = A.frames;
+    const thr = Math.max(A.peakRms * 0.14, speechGate(A));
+    const ok = fr.map((f) => f.rms > thr && f.voicing > 0.6);
+    // smoothed energy
+    const e = fr.map((f, i) => {
+      let s = 0, n = 0;
+      for (let k = -2; k <= 2; k++) if (fr[i + k]) { s += fr[i + k].rms; n++; }
+      return s / n;
+    });
+    const runs = [];
+    let st = -1;
+    for (let i = 0; i <= fr.length; i++) {
+      if (i < fr.length && ok[i]) { if (st < 0) st = i; }
+      else if (st >= 0) {
+        // bridge tiny gaps (1 frame)
+        if (i < fr.length - 1 && ok[i + 1]) continue;
+        runs.push([st, i - 1]); st = -1;
+      }
+    }
+    // split runs at energy dips
+    const segs = [];
+    for (const [a, b] of runs) {
+      let cur = a;
+      for (let i = a + 3; i <= b - 3; i++) {
+        if (e[i] <= e[i - 1] && e[i] <= e[i + 1]) {
+          let lp = 0, rp = 0;
+          for (let k = cur; k < i; k++) lp = Math.max(lp, e[k]);
+          for (let k = i + 1; k <= b; k++) rp = Math.max(rp, e[k]);
+          if (e[i] < 0.62 * Math.min(lp, rp)) { segs.push([cur, i - 1]); cur = i + 1; }
+        }
+      }
+      segs.push([cur, b]);
+    }
+    return segs
+      .filter(([a, b]) => b - a + 1 >= 4)
+      .map(([a, b]) => {
+        let peak = 0;
+        for (let k = a; k <= b; k++) peak = Math.max(peak, fr[k].rms);
+        const core = [];
+        for (let k = a; k <= b; k++) if (fr[k].rms >= 0.45 * peak && ok[k] && !isNaN(fr[k].F1) && !isNaN(fr[k].F2)) core.push(fr[k]);
+        const q = Math.floor(core.length * 0.15);
+        const mid = core.slice(q, core.length - q || undefined);
+        const use = mid.length >= 2 ? mid : core;
+        if (core.length < 2) return null;
+        return {
+          start: fr[a].t, end: fr[b].t, frames: core,
+          F1: median(use.map((f) => f.F1)), F2: median(use.map((f) => f.F2)), F3: median(use.filter((f) => !isNaN(f.F3)).map((f) => f.F3)),
+          energy: peak * (b - a + 1),
+        };
+      })
+      .filter(Boolean);
+  }
+
+  // pick n nuclei (keeping order) maximising energy
+  function pickNuclei(nu, n) {
+    if (nu.length <= n) return nu;
+    const idx = nu.map((x, i) => i).sort((p, q) => nu[q].energy - nu[p].energy).slice(0, n).sort((p, q) => p - q);
+    return idx.map((i) => nu[i]);
+  }
+
+  // ---------- vowel evaluation ----------
+  /**
+   * expected: array of vowel targets, e.g. ['y'] or ['*','y'] ('*' = not checked)
+   * returns {ok, score, syllables:[{target, got, score, ok}], heard}
+   */
+  function evalVowels(A, expected, cal) {
+    const T = templates(cal);
+    const nu = nuclei(A);
+    if (!nu.length) return { heard: false, score: 0, syllables: expected.map((t) => ({ target: t, got: null, score: 0, ok: t === '*' })) };
+    const chosen = pickNuclei(nu, expected.length);
+    const syl = expected.map((target, k) => {
+      const n = chosen[k];
+      if (!n) return { target, got: null, score: target === '*' ? 100 : 0, ok: target === '*' };
+      const f = { F1: n.F1, F2: n.F2, F3: n.F3 };
+      const c = classifyVowel(f, T);
+      let glide = false;
+      if (target === 'y' && n.frames.length >= 8) {
+        const q = Math.max(2, Math.floor(n.frames.length / 4));
+        const f2s = median(n.frames.slice(0, q).map((x) => x.F2));
+        const f2e = median(n.frames.slice(-q).map((x) => x.F2));
+        if (f2s > f2e * 1.35 && f2s > T.y.F2 * 1.05) glide = true; // English "you" slide
+      }
+      if (target === '*') return { target, got: c.label, score: 100, ok: true, f };
+      const p = c.probs[target] || 0;
+      let score = Math.round(100 * Math.min(1, p / 0.55));
+      if (c.label === target) score = Math.max(score, 72);
+      if (glide) score = Math.min(score, 55);
+      return { target, got: c.label, score, ok: score >= 70, glide, f };
+    });
+    const checked = syl.filter((s) => s.target !== '*');
+    const score = checked.length ? Math.round(checked.reduce((s, x) => s + x.score, 0) / checked.length) : 100;
+    return { heard: true, score, syllables: syl, nucleiCount: nu.length };
+  }
+
+  /** Sustained vowel or glide: per-frame classification. target 'y' or glide 'iy' */
+  function evalSustained(A, target, cal) {
+    const T = templates(cal);
+    const vf = A.frames.filter((f) => isVowelFrame(f, A));
+    if (vf.length < 8) return { heard: false, score: 0 };
+    const labs = vf.map((f) => classifyVowel(f, T).label);
+    // median-like smoothing (majority over 5)
+    const sm = labs.map((l, i) => {
+      const cnt = {};
+      for (let k = -2; k <= 2; k++) if (labs[i + k]) cnt[labs[i + k]] = (cnt[labs[i + k]] || 0) + 1;
+      return Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+    });
+    const tally = (arr) => { const c = {}; arr.forEach((l) => (c[l] = (c[l] || 0) + 1)); return c; };
+    if (target.length === 2) {
+      const q = Math.floor(sm.length * 0.4);
+      const first = sm.slice(0, q), last = sm.slice(-q);
+      const s1 = first.filter((l) => l === target[0]).length / first.length;
+      const s2 = last.filter((l) => l === target[1]).length / last.length;
+      const t1 = tally(first), t2 = tally(last);
+      const top = (t) => Object.keys(t).sort((a, b) => t[b] - t[a])[0];
+      return {
+        heard: true, score: Math.round(100 * Math.min(1, (s1 + s2) / 2 / 0.6)),
+        parts: [{ target: target[0], got: top(t1), share: s1 }, { target: target[1], got: top(t2), share: s2 }],
+        track: vf.map((f, i) => ({ F1: f.F1, F2: f.F2, l: sm[i] })),
+      };
+    }
+    const share = sm.filter((l) => l === target).length / sm.length;
+    const t = tally(sm);
+    const others = Object.keys(t).filter((k) => k !== target).sort((a, b) => t[b] - t[a]);
+    return {
+      heard: true, share, score: Math.round(100 * Math.min(1, share / 0.6)),
+      got: share >= 0.5 ? target : others[0], track: vf.map((f, i) => ({ F1: f.F1, F2: f.F2, l: sm[i] })),
+    };
+  }
+
+  // ---------- R detection ----------
+  function envelope(x, fs) {
+    // rectify + 4th-order Butterworth low-pass at 45 Hz (removes pitch ripple, keeps 20–35 Hz trill beats)
+    const fc = 45, w0 = (2 * Math.PI * fc) / fs, alpha = Math.sin(w0) / (2 * Math.SQRT1_2), cw = Math.cos(w0);
+    const b0 = (1 - cw) / 2, b1 = 1 - cw, b2 = (1 - cw) / 2, a0 = 1 + alpha, a1 = -2 * cw, a2 = 1 - alpha;
+    let v = Float64Array.from(x, Math.abs);
+    for (let pass = 0; pass < 2; pass++) {
+      let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+      const o = new Float64Array(v.length);
+      for (let i = 0; i < v.length; i++) {
+        const yv = (b0 * v[i] + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0;
+        x2 = x1; x1 = v[i]; y2 = y1; y1 = yv; o[i] = yv;
+      }
+      v = o;
+    }
+    const h = Math.round(fs * 0.002), env = [];
+    for (let i = 0; i < v.length; i += h) env.push(Math.max(0, v[i]));
+    return { env, dt: h / fs };
+  }
+  function trillCount(x, fs, tStart, tEnd) {
+    const { env, dt } = envelope(x, fs);
+    const a = Math.max(1, Math.floor(tStart / dt)), b = Math.min(env.length - 2, Math.floor(tEnd / dt));
+    // local maxima/minima
+    const ext = [];
+    for (let i = a; i <= b; i++) {
+      if (env[i] > env[i - 1] && env[i] >= env[i + 1]) ext.push({ i, v: env[i], max: true });
+      else if (env[i] < env[i - 1] && env[i] <= env[i + 1]) ext.push({ i, v: env[i], max: false });
+    }
+    // collapse to alternating significant extrema
+    let best = 0, run = 0, lastMax = null;
+    for (let k = 1; k < ext.length - 1; k++) {
+      const m = ext[k];
+      if (m.max) continue;
+      // nearest maxima left and right
+      let L = null, R = null;
+      for (let j = k - 1; j >= 0; j--) if (ext[j].max) { L = ext[j]; break; }
+      for (let j = k + 1; j < ext.length; j++) if (ext[j].max) { R = ext[j]; break; }
+      if (!L || !R) continue;
+      const depth = m.v / Math.min(L.v, R.v);
+      const spacing = (R.i - L.i) * dt;
+      if (depth < 0.45 && spacing >= 0.02 && spacing <= 0.065) {
+        if (lastMax && L.i === lastMax.i) run++; else run = 1;
+        lastMax = R;
+        best = Math.max(best, run);
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Returns {kind: 'french'|'english'|'rolled'|'weak'|'silent', score, stats}
+   */
+  function evalR(A, x, cal) {
+    const c = cal || DEFAULT_CAL;
+    const gate = speechGate(A);
+    const fr = A.frames;
+    const speech = fr.filter((f) => f.rms > gate);
+    if (speech.length < 5) return { kind: 'silent', score: 0 };
+    const f3thr = Math.min(0.74 * c.a.F3, 2150);
+    // English R: voiced frames with very low F3
+    let engRun = 0, engBest = 0, fricRun = 0, fricBest = 0, fricTotal = 0;
+    for (const f of fr) {
+      const isSpeech = f.rms > gate * 0.8;
+      const eng = isSpeech && f.voicing > 0.6 && f.flat < 0.3 && !isNaN(f.F3) && f.F3 < f3thr && f.F2 > 850 && f.F2 < 1750 && f.F3 - f.F2 < 1000 && f.F1 < 650;
+      engRun = eng ? engRun + 1 : 0;
+      engBest = Math.max(engBest, engRun);
+      const fric = f.rms > Math.max(A.noiseRms * 3, A.peakRms * 0.03) && f.flat > 0.33 && f.band > 0.25 && f.centroid > 450 && f.centroid < 3000;
+      fricRun = fric ? fricRun + 1 : 0;
+      if (fric) fricTotal++;
+      fricBest = Math.max(fricBest, fricRun);
+    }
+    const t0 = speech[0].t, t1 = speech[speech.length - 1].t;
+    const trill = trillCount(x, A.fs, t0, Math.max(t0, t1 - 0.15));
+    const stats = { engBest, fricBest, fricTotal, trill, speechFrames: speech.length, f3thr: Math.round(f3thr) };
+    if (engBest >= 4) return { kind: 'english', score: 20, stats };
+    if (fricBest >= 3) return { kind: 'french', score: Math.min(100, 78 + fricBest * 3), stats };
+    if (trill >= 2) return { kind: 'rolled', score: 40, stats };
+    return { kind: 'weak', score: 45, stats };
+  }
+
+  /** For sustained "rrrr": share of speech frames that are frication. */
+  function evalRSustained(A, x, cal) {
+    const r = evalR(A, x, cal);
+    if (r.kind === 'silent') return r;
+    const share = r.stats.fricTotal / Math.max(1, r.stats.speechFrames);
+    r.share = share;
+    if (r.kind === 'french') r.score = Math.round(100 * Math.min(1, share / 0.45));
+    if (r.kind === 'french' && r.score < 70) r.kind = 'weak';
+    return r;
+  }
+
+  // ---------- calibration ----------
+  function calibrationVowel(A) {
+    const vf = A.frames.filter((f) => isVowelFrame(f, A));
+    if (vf.length < 10) return null;
+    const q = Math.floor(vf.length * 0.2);
+    const mid = vf.slice(q, vf.length - q);
+    return {
+      F1: median(mid.map((f) => f.F1)),
+      F2: median(mid.map((f) => f.F2)),
+      F3: median(mid.filter((f) => !isNaN(f.F3)).map((f) => f.F3)),
+      f0: median(mid.map((f) => f.f0)),
+    };
+  }
+  function validCalibration(c) {
+    return c && c.i && c.a && c.u && c.i.F2 > c.u.F2 * 1.7 && c.a.F1 > c.i.F1 * 1.5 && c.a.F1 > c.u.F1 * 1.4 && !isNaN(c.i.F3);
+  }
+
+  return {
+    setLagWidth: (b) => (LAGW = b), analyze, liveFrame, templates, classifyVowel, evalVowels, evalSustained, evalR, evalRSustained,
+    calibrationVowel, validCalibration, nuclei, DEFAULT_CAL, isVowelFrame, speechGate, median,
+  };
+})();
+if (typeof module !== 'undefined') module.exports = DSP;
+</script>
+<script>/* Lesson content. v: expected vowels per syllable ('y' = French U, 'u' = OU, 'i' = I, '*' = not checked). r: check the R. */
+const LESSONS = [
+  {
+    id: 'u', title: 'Le U', sub: 'tu · vu · rue', color: '#8b6cff', soft: '#e9e3ff', emoji: '😗',
+    tip: {
+      mouth: 'iy',
+      title: 'The French U',
+      lines: [
+        'Say <b>“eee”</b> (like in <i>see</i>).',
+        'Freeze your tongue right there. 🧊',
+        'Now push your lips into a <b>tiny kiss</b>. 😗',
+        'That’s U! It’s <b>not</b> “oo” and <b>not</b> “you”.',
+      ],
+      model: 'u',
+    },
+    steps: [
+      { title: 'Find the sound', items: [
+        { kind: 'sustain', say: 'uuuu', model: 'u', target: 'y', hint: 'Hold it for 2 seconds' },
+        { kind: 'glide', say: 'iiii → uuuu', model: 'i… u', target: 'iy', hint: 'Start with I, then just round your lips. Don’t move your tongue!' },
+        { kind: 'sustain', say: 'uuuu', model: 'u', target: 'y', hint: 'One more — steady and round' },
+      ] },
+      { title: 'Tiny words', items: [
+        { kind: 'word', w: 'tu', v: ['y'], en: 'you' },
+        { kind: 'word', w: 'vu', v: ['y'], en: 'seen' },
+        { kind: 'word', w: 'lu', v: ['y'], en: 'read' },
+        { kind: 'word', w: 'du', v: ['y'], en: 'some' },
+        { kind: 'word', w: 'su', v: ['y'], en: 'known' },
+      ] },
+      { title: 'U or OU?', items: [
+        { kind: 'pair', a: { w: 'tu', v: ['y'], en: 'you' }, b: { w: 'tout', v: ['u'], en: 'all' } },
+        { kind: 'pair', a: { w: 'vu', v: ['y'], en: 'seen' }, b: { w: 'vous', v: ['u'], en: 'you (formal)' } },
+        { kind: 'pair', a: { w: 'lu', v: ['y'], en: 'read' }, b: { w: 'loup', v: ['u'], en: 'wolf' } },
+        { kind: 'pair', a: { w: 'du', v: ['y'], en: 'some' }, b: { w: 'doux', v: ['u'], en: 'soft' } },
+      ] },
+      { title: 'Real words', items: [
+        { kind: 'word', w: 'salut', syl: ['sa', 'lut'], v: ['*', 'y'], en: 'hi!' },
+        { kind: 'word', w: 'une', v: ['y'], en: 'a / one' },
+        { kind: 'word', w: 'jupe', v: ['y'], en: 'skirt' },
+        { kind: 'word', w: 'musique', syl: ['mu', 'sique'], v: ['y', 'i'], en: 'music' },
+        { kind: 'word', w: 'voiture', syl: ['voi', 'ture'], v: ['*', 'y'], en: 'car' },
+      ] },
+      { title: 'Little sentences', items: [
+        { kind: 'sentence', s: 'Tu as vu ?', focus: ['tu', 'vu'], en: 'Did you see?' },
+        { kind: 'sentence', s: 'Salut, tu vas bien ?', focus: ['salut', 'tu'], en: 'Hi, are you ok?' },
+        { kind: 'sentence', s: 'J’ai lu une histoire.', focus: ['lu', 'une'], en: 'I read a story.' },
+      ] },
+    ],
+  },
+  {
+    id: 'i', title: 'Le I', sub: 'si · lit · midi', color: '#ff7aa8', soft: '#ffe3ee', emoji: '😁',
+    tip: {
+      mouth: 'i',
+      title: 'The French I',
+      lines: [
+        'Big <b>smile</b>! 😁',
+        'Tongue <b>high and tight</b>, close to the roof of your mouth.',
+        'Short and sharp, like a little mouse: <b>“ee!”</b> 🐭',
+        'English <i>“ih”</i> (as in <i>sit</i>) is too relaxed. French I is always the tense one.',
+      ],
+      model: 'i',
+    },
+    steps: [
+      { title: 'Find the sound', items: [
+        { kind: 'sustain', say: 'iiii', model: 'i', target: 'i', hint: 'Smile and hold it for 2 seconds' },
+        { kind: 'sustain', say: 'iiii', model: 'i', target: 'i', hint: 'Even tighter — big smile' },
+      ] },
+      { title: 'Tiny words', items: [
+        { kind: 'word', w: 'si', v: ['i'], en: 'if / so' },
+        { kind: 'word', w: 'lit', v: ['i'], en: 'bed' },
+        { kind: 'word', w: 'dit', v: ['i'], en: 'said' },
+        { kind: 'word', w: 'vie', v: ['i'], en: 'life' },
+        { kind: 'word', w: 'il', v: ['i'], en: 'he' },
+      ] },
+      { title: 'I or U?', items: [
+        { kind: 'pair', a: { w: 'lit', v: ['i'], en: 'bed' }, b: { w: 'lu', v: ['y'], en: 'read' } },
+        { kind: 'pair', a: { w: 'si', v: ['i'], en: 'if' }, b: { w: 'su', v: ['y'], en: 'known' } },
+        { kind: 'pair', a: { w: 'vie', v: ['i'], en: 'life' }, b: { w: 'vu', v: ['y'], en: 'seen' } },
+        { kind: 'pair', a: { w: 'dit', v: ['i'], en: 'said' }, b: { w: 'du', v: ['y'], en: 'some' } },
+      ] },
+      { title: 'Real words', items: [
+        { kind: 'word', w: 'midi', syl: ['mi', 'di'], v: ['i', 'i'], en: 'noon' },
+        { kind: 'word', w: 'ici', syl: ['i', 'ci'], v: ['i', 'i'], en: 'here' },
+        { kind: 'word', w: 'fini', syl: ['fi', 'ni'], v: ['i', 'i'], en: 'finished' },
+        { kind: 'word', w: 'ami', syl: ['a', 'mi'], v: ['*', 'i'], en: 'friend' },
+        { kind: 'word', w: 'petit', syl: ['pe', 'tit'], v: ['*', 'i'], en: 'small' },
+      ] },
+      { title: 'Little sentences', items: [
+        { kind: 'sentence', s: 'Il lit ici.', focus: ['il', 'lit', 'ici'], en: 'He reads here.' },
+        { kind: 'sentence', s: 'Mimi a fini.', focus: ['mimi', 'fini'], en: 'Mimi is done.' },
+        { kind: 'sentence', s: 'Merci, mon ami !', focus: ['merci', 'ami'], en: 'Thanks, my friend!' },
+      ] },
+    ],
+  },
+  {
+    id: 'r', title: 'Le R', sub: 'rat · riz · rouge', color: '#ff9f43', soft: '#fff0dc', emoji: '🦁',
+    tip: {
+      mouth: 'r',
+      title: 'The French R',
+      lines: [
+        'Put the <b>tip of your tongue down</b>, behind your bottom teeth. 👇',
+        'Now make a <b>soft gargle</b> at the back of your throat. 🫧',
+        'Like the end of Scottish <i>“loch”</i>, but with your voice on.',
+        '<b>Don’t curl your tongue</b> (that’s the English R) and <b>don’t roll it</b> (that’s Spanish).',
+      ],
+      model: 'ra',
+    },
+    steps: [
+      { title: 'Find the sound', items: [
+        { kind: 'rsustain', say: 'rrrrr', model: 'r', hint: 'Gentle gargle for 2 seconds. Tongue tip stays down!' },
+        { kind: 'rsustain', say: 'rrrrr', model: 'r', hint: 'Again — soft and steady, like a purring cat 🐈' },
+      ] },
+      { title: 'R + a vowel', items: [
+        { kind: 'word', w: 'ra', r: true, en: '' },
+        { kind: 'word', w: 'ri', r: true, v: ['i'], en: '' },
+        { kind: 'word', w: 'rou', r: true, v: ['u'], en: '' },
+        { kind: 'word', w: 'ru', r: true, v: ['y'], en: '' },
+      ] },
+      { title: 'Tiny words', items: [
+        { kind: 'word', w: 'rat', r: true, en: 'rat' },
+        { kind: 'word', w: 'riz', r: true, v: ['i'], en: 'rice' },
+        { kind: 'word', w: 'rue', r: true, v: ['y'], en: 'street' },
+        { kind: 'word', w: 'roue', r: true, v: ['u'], en: 'wheel' },
+        { kind: 'word', w: 'rose', r: true, en: 'pink / rose' },
+      ] },
+      { title: 'R in the middle & end', items: [
+        { kind: 'word', w: 'Paris', syl: ['Pa', 'ris'], r: true, v: ['*', 'i'], en: 'Paris' },
+        { kind: 'word', w: 'merci', syl: ['mer', 'ci'], r: true, v: ['*', 'i'], en: 'thank you' },
+        { kind: 'word', w: 'pour', r: true, v: ['u'], en: 'for' },
+        { kind: 'word', w: 'mer', r: true, en: 'sea' },
+        { kind: 'word', w: 'rire', r: true, v: ['i'], en: 'to laugh' },
+      ] },
+      { title: 'Little sentences', items: [
+        { kind: 'sentence', s: 'Le rat rouge.', focus: ['rat', 'rouge'], en: 'The red rat.' },
+        { kind: 'sentence', s: 'Il rit à Paris.', focus: ['rit', 'paris'], en: 'He laughs in Paris.' },
+        { kind: 'sentence', s: 'Merci pour le riz !', focus: ['merci', 'pour', 'riz'], en: 'Thanks for the rice!' },
+      ] },
+    ],
+  },
+  {
+    id: 'mix', title: 'Le grand mix', sub: 'U · OU · I · R', color: '#2ec4b6', soft: '#dcf7f4', emoji: '🎉',
+    tip: {
+      mouth: 'mix',
+      title: 'Put it all together',
+      lines: [
+        '<b>I</b> = big smile 😁',
+        '<b>U</b> = smile tongue + tiny kiss 😗',
+        '<b>OU</b> = tongue back + round lips, like blowing a candle 🕯️',
+        '<b>R</b> = soft gargle, tongue tip down 🦁',
+      ],
+      model: 'i, u, ou',
+    },
+    steps: [
+      { title: 'Three in a row', items: [
+        { kind: 'triple', words: [{ w: 'vie', v: ['i'], en: 'life' }, { w: 'vu', v: ['y'], en: 'seen' }, { w: 'vous', v: ['u'], en: 'you' }] },
+        { kind: 'triple', words: [{ w: 'lit', v: ['i'], en: 'bed' }, { w: 'lu', v: ['y'], en: 'read' }, { w: 'loup', v: ['u'], en: 'wolf' }] },
+      ] },
+      { title: 'Tricky pairs', items: [
+        { kind: 'pair', a: { w: 'rue', r: true, v: ['y'], en: 'street' }, b: { w: 'roue', r: true, v: ['u'], en: 'wheel' } },
+        { kind: 'pair', a: { w: 'riz', r: true, v: ['i'], en: 'rice' }, b: { w: 'rue', r: true, v: ['y'], en: 'street' } },
+      ] },
+      { title: 'Real words', items: [
+        { kind: 'word', w: 'sûr', r: true, v: ['y'], en: 'sure' },
+        { kind: 'word', w: 'sourire', syl: ['sou', 'rire'], r: true, v: ['u', 'i'], en: 'smile' },
+        { kind: 'word', w: 'Russie', syl: ['Ru', 'ssie'], r: true, v: ['y', 'i'], en: 'Russia' },
+        { kind: 'word', w: 'tortue', syl: ['tor', 'tue'], r: true, v: ['*', 'y'], en: 'turtle' },
+      ] },
+      { title: 'Little sentences', items: [
+        { kind: 'sentence', s: 'Tu as vu la rue ?', focus: ['tu', 'vu', 'rue'], en: 'Did you see the street?' },
+        { kind: 'sentence', s: 'Il a lu sur le lit.', focus: ['il', 'lu', 'sur', 'lit'], en: 'He read on the bed.' },
+        { kind: 'sentence', s: 'Bonjour, tu souris !', focus: ['bonjour', 'tu', 'souris'], en: 'Hello, you’re smiling!' },
+      ] },
+    ],
+  },
+];
+</script>
+<script>(() => {
+  'use strict';
+  const $ = (s, el = document) => el.querySelector(s);
+  const app = $('#app');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // ================= storage =================
+  const Store = {
+    data: { cal: null, prog: {}, muted: false, numbers: false },
+    load() { try { const d = JSON.parse(localStorage.getItem('bulles-v1') || 'null'); if (d) Object.assign(this.data, d); } catch (e) {} },
+    save() { try { localStorage.setItem('bulles-v1', JSON.stringify(this.data)); } catch (e) {} },
+  };
+  Store.load();
+
+  // ================= audio context + sound effects =================
+  let ctx = null;
+  function audioCtx() {
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; ctx = new AC(); }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  const Sfx = {
+    tone(freq, dur, type = 'sine', vol = 0.15, slideTo = null, delay = 0) {
+      if (Store.data.muted || Mic.recording) return; // never play while listening
+      try {
+        const c = audioCtx(), t = c.currentTime + delay;
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = type; o.frequency.setValueAtTime(freq, t);
+        if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(t); o.stop(t + dur + 0.03);
+      } catch (e) {}
+    },
+    pop() { this.tone(450 + Math.random() * 350, 0.09, 'sine', 0.2, 1300 + Math.random() * 600); },
+    tap() { this.tone(760, 0.05, 'triangle', 0.08); },
+    good() { [660, 880, 1320].forEach((f, i) => this.tone(f, 0.2, 'sine', 0.13, null, i * 0.08)); },
+    great() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, 0.24, 'triangle', 0.12, null, i * 0.07)); },
+    meh() { [520, 470].forEach((f, i) => this.tone(f, 0.16, 'sine', 0.1, null, i * 0.1)); },
+    bad() { this.tone(330, 0.28, 'triangle', 0.12, 210); },
+    ready() { this.tone(880, 0.07, 'sine', 0.09); },
+  };
+
+  // ================= microphone =================
+  const Mic = {
+    stream: null, src: null, proc: null, sink: null, recording: false, buf: [], fs: 48000, _stop: null,
+    async ensure() {
+      const c = audioCtx();
+      if (this.stream && this.stream.active) return;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('nomic');
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+      this.src = c.createMediaStreamSource(this.stream);
+      this.proc = c.createScriptProcessor(2048, 1, 1);
+      this.sink = c.createGain(); this.sink.gain.value = 0;
+      this.src.connect(this.proc); this.proc.connect(this.sink); this.sink.connect(c.destination);
+      this.fs = c.sampleRate;
+      this.proc.onaudioprocess = (e) => {
+        if (!this.recording) return;
+        const d = new Float32Array(e.inputBuffer.getChannelData(0));
+        this.buf.push(d);
+        if (this._onChunk) this._onChunk(d);
+      };
+    },
+    release() {
+      try { if (this.stream) this.stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
+      try { this.src && this.src.disconnect(); this.proc && this.proc.disconnect(); } catch (e) {}
+      this.stream = null;
+    },
+    stopNow() { if (this._stop) this._stop(); },
+    /** Record until the speaker stops (or maxSec). onLive gets {rms, level, F1, F2, F3, voicing, speaking}. */
+    record({ maxSec = 3, minSec = 0.6, silenceStop = 0.65, onLive = null } = {}) {
+      return new Promise((resolve) => {
+        this.buf = [];
+        this.recording = true;
+        const fs = this.fs;
+        let elapsed = 0, noise = Infinity, speech = false, silentFor = 0, tail = new Float32Array(0), lastLive = 0;
+        const finish = () => {
+          if (!this.recording) return;
+          this.recording = false; this._onChunk = null; this._stop = null;
+          const n = this.buf.reduce((s, b) => s + b.length, 0);
+          const out = new Float32Array(n);
+          let k = 0;
+          for (const b of this.buf) { out.set(b, k); k += b.length; }
+          resolve({ samples: out, fs, speech });
+        };
+        this._stop = finish;
+        this._onChunk = (d) => {
+          const dur = d.length / fs;
+          elapsed += dur;
+          let s = 0;
+          for (let i = 0; i < d.length; i++) s += d[i] * d[i];
+          const rms = Math.sqrt(s / d.length);
+          noise = Math.min(noise, Math.max(rms, 1e-5));
+          const thr = Math.max(noise * 3.5, 0.003);
+          const loud = rms > thr;
+          if (loud) { speech = true; silentFor = 0; } else if (speech) silentFor += dur;
+          // live analysis on the most recent ~45 ms
+          const t2 = new Float32Array(Math.min(tail.length + d.length, Math.round(fs * 0.06)));
+          const merged = new Float32Array(tail.length + d.length); merged.set(tail); merged.set(d, tail.length);
+          t2.set(merged.subarray(merged.length - t2.length)); tail = t2;
+          if (onLive) {
+            let f = null;
+            if (loud && elapsed - lastLive > 0.03) { try { f = DSP.liveFrame(tail, fs); } catch (e) {} lastLive = elapsed; }
+            const level = Math.max(0, Math.min(1, (20 * Math.log10(rms + 1e-9) + 60) / 50));
+            onLive({ rms, level, speaking: loud, ...(f || {}) });
+          }
+          if (elapsed >= maxSec || (speech && silentFor >= silenceStop && elapsed >= minSec)) finish();
+        };
+      });
+    },
+  };
+
+  function playSamples(samples, fs) {
+    try {
+      const c = audioCtx();
+      const b = c.createBuffer(1, samples.length, fs);
+      b.copyToChannel ? b.copyToChannel(samples, 0) : b.getChannelData(0).set(samples);
+      const s = c.createBufferSource(); s.buffer = b;
+      const g = c.createGain(); g.gain.value = 1.4;
+      s.connect(g); g.connect(c.destination); s.start();
+    } catch (e) {}
+  }
+
+  // ================= French voice (text to speech) =================
+  let frVoice = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    const vs = speechSynthesis.getVoices();
+    const fr = vs.filter((v) => /^fr/i.test(v.lang));
+    frVoice = fr.find((v) => /fr[-_]FR/i.test(v.lang) && /google|am[ée]lie|thomas|audrey|aur[ée]lie|marie|denise|julie|daniel/i.test(v.name)) || fr.find((v) => /fr[-_]FR/i.test(v.lang)) || fr[0] || null;
+  }
+  if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text, slow = false) {
+    if (!('speechSynthesis' in window)) { toast('This browser can’t speak French aloud.'); return; }
+    if (!frVoice) pickVoice();
+    if (!frVoice) toast('No French voice found on this device — the model may sound off.');
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; if (frVoice) u.voice = frVoice;
+    u.rate = slow ? 0.55 : 0.85;
+    speechSynthesis.speak(u);
+  }
+
+  // ================= speech recognition (sentences) =================
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  function recognize() {
+    return new Promise((resolve) => {
+      let done = false;
+      const r = new SR();
+      r.lang = 'fr-FR'; r.interimResults = false; r.maxAlternatives = 5; r.continuous = false;
+      const end = (v) => { if (!done) { done = true; resolve(v); } };
+      r.onresult = (e) => end({ ok: true, alts: Array.from(e.results[0]).map((a) => a.transcript) });
+      r.onerror = (e) => end({ ok: false, error: e.error });
+      r.onend = () => end({ ok: false, error: 'no-speech' });
+      try { r.start(); } catch (e) { end({ ok: false, error: 'start' }); }
+      setTimeout(() => { try { r.stop(); } catch (e) {} }, 8000);
+    });
+  }
+  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’'`-]/g, ' ').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  function compareSentence(expected, alts) {
+    const exp = norm(expected);
+    let best = null;
+    for (const alt of alts) {
+      const got = norm(alt);
+      // LCS alignment
+      const m = exp.length, n = got.length, L = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+      for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) L[i][j] = exp[i] === got[j] ? 1 + L[i + 1][j + 1] : Math.max(L[i + 1][j], L[i][j + 1]);
+      const ok = new Array(m).fill(false);
+      let i = 0, j = 0;
+      while (i < m && j < n) { if (exp[i] === got[j]) { ok[i] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+      const score = ok.filter(Boolean).length / m;
+      if (!best || score > best.score) best = { score, ok, alt };
+    }
+    return best;
+  }
+
+  // ================= feedback text =================
+  const VNAME = { i: 'I', y: 'U', u: 'OU', I: 'English “ih”', Y: 'English “oo”', U: '“oo” (book)', e: 'É', a: 'A' };
+  const FB = {
+    y: {
+      u: 'That was <b>OU</b> (like “food”). Keep the kiss, but push your tongue <b>forward</b>, like for I.',
+      Y: 'Almost! Push your tongue a bit <b>more forward</b> — think “eee” inside the kiss.',
+      U: 'Too relaxed. <b>Tighter kiss</b>, tongue high and forward.',
+      i: 'That was <b>I</b>. Same tongue — now <b>round your lips</b> into a tiny kiss. 😗',
+      I: 'That sounded like English “ih”. Tongue high like “eee”, then <b>pucker</b>.',
+      e: 'Mouth a bit too open. Nearly close it — tongue high, tiny kiss.',
+      a: 'Mouth too open. Close it almost all the way into a tiny kiss.',
+      glide: 'You slid like English <b>“you”</b> (ee→oo). Hold <b>one steady sound</b> from start to end.',
+    },
+    i: {
+      I: 'Too relaxed — that’s English “ih” (as in <i>sit</i>). <b>Big smile</b>, tongue high and tight: “eee”.',
+      y: 'Your lips were rounded (that’s U). <b>Spread them</b> into a big smile. 😁',
+      Y: 'Lips rounded and tongue back. Big smile, tongue forward and high.',
+      u: 'That was <b>OU</b>. Smile wide and bring your tongue forward.',
+      U: 'Smile wide, tongue forward and high.',
+      e: 'A bit too open (sounds like “é”). Close a little, smile, tense.',
+      a: 'Mouth too open. Close it into a smile: “eee”.',
+    },
+    u: {
+      y: 'That was the French <b>U</b>! For OU, pull your tongue <b>back</b> — like blowing out a candle. 🕯️',
+      Y: 'Too far forward (English “oo” drifts forward). Pull the tongue <b>back</b>, round your lips tight.',
+      i: 'That was <b>I</b>. Round your lips and pull your tongue back: “oo”.',
+      I: 'Round your lips and pull the tongue back.',
+      U: 'Too open — like “book”. <b>Tighter, rounder</b> lips.',
+      e: 'Round your lips and pull your tongue back.',
+      a: 'Mouth too open. Round your lips tightly.',
+    },
+  };
+  const RFB = {
+    french: 'Beautiful throat R! 🦁',
+    english: 'That was an <b>English R</b> (tongue curled up). Keep the tongue tip <b>down</b> behind your bottom teeth and gargle softly at the back.',
+    rolled: 'That was a <b>rolled R</b> (tongue tip, like Spanish). The French R is in the <b>throat</b> — tongue tip stays down.',
+    weak: 'I couldn’t hear a throat R. Make it <b>stronger</b> — a soft gargle, like the end of Scottish “loch”.',
+    silent: 'I didn’t hear anything — try a bit louder or closer to the mic.',
+  };
+  const RNAME = { french: 'French R', english: 'English R', rolled: 'Rolled R', weak: 'Too soft', silent: '—' };
+  const PRAISE = ['Parfait ! 🎉', 'Bravo ! ✨', 'Super ! 🌟', 'Magnifique ! 💜', 'Génial ! 🫧', 'Trop bien ! 🙌'];
+  const MID = ['Presque ! 🤏', 'So close!', 'Getting there! 💪'];
+  const LOW = ['Not yet — try again 💜', 'Let’s fix it 🔧', 'Again! You’ve got this'];
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+  // ================= evaluation =================
+  const cal = () => Store.data.cal;
+  function vowelPart(target, got, score, glide, syl) {
+    const ok = score >= 70;
+    let msg = '';
+    if (!ok) msg = glide ? FB.y.glide : (got && FB[target] && FB[target][got]) || (got ? `That sounded like <b>${VNAME[got] || got}</b>. Try again!` : 'I couldn’t catch that vowel — try again, a bit louder.');
+    return { type: 'vowel', target, got, score, ok, msg, syl };
+  }
+  function evalWord(it, rec) {
+    const A = DSP.analyze(rec.samples, rec.fs);
+    const parts = [];
+    const syls = it.syl || [it.w];
+    let dbg = { nuclei: DSP.nuclei(A).map((n) => [n.F1, n.F2, n.F3].map(Math.round)) };
+    if (it.v) {
+      const ev = DSP.evalVowels(A, it.v, cal());
+      dbg.vowels = ev.syllables.map((s) => ({ t: s.target, g: s.got, sc: s.score, f: s.f && [s.f.F1, s.f.F2, s.f.F3].map(Math.round), glide: s.glide }));
+      ev.syllables.forEach((s, k) => {
+        const syl = syls[k] || syls[syls.length - 1];
+        if (s.target === '*') parts.push({ type: 'skip', syl });
+        else parts.push(vowelPart(s.target, s.got, s.score, s.glide, syl));
+      });
+    } else syls.forEach((syl) => parts.push({ type: 'skip', syl }));
+    if (it.r) {
+      const r = DSP.evalR(A, rec.samples, cal());
+      dbg.r = r;
+      parts.push({ type: 'r', kind: r.kind, score: r.score, ok: r.score >= 70, msg: r.score >= 70 ? '' : RFB[r.kind] });
+    }
+    return finalize(parts, rec, dbg);
+  }
+  function evalSustainItem(it, rec) {
+    const A = DSP.analyze(rec.samples, rec.fs);
+    const parts = [];
+    let track = null, dbg = {};
+    if (it.kind === 'rsustain') {
+      const r = DSP.evalRSustained(A, rec.samples, cal());
+      dbg.r = r;
+      parts.push({ type: 'r', kind: r.kind, score: r.score, ok: r.score >= 70, msg: r.score >= 70 ? '' : RFB[r.kind] });
+    } else if (it.kind === 'glide') {
+      const ev = DSP.evalSustained(A, 'iy', cal());
+      dbg.ev = ev.parts;
+      if (!ev.heard) parts.push({ type: 'vowel', target: 'y', got: null, score: 0, ok: false, msg: 'I couldn’t hear a long enough sound. Hold it for about 2 seconds.', syl: 'i → u' });
+      else {
+        track = ev.track;
+        ev.parts.forEach((p, k) => parts.push(vowelPart(p.target, p.got, Math.round(100 * Math.min(1, p.share / 0.6)), false, k ? 'uuu' : 'iii')));
+      }
+    } else {
+      const ev = DSP.evalSustained(A, it.target, cal());
+      dbg.ev = { score: ev.score, share: ev.share, got: ev.got };
+      if (!ev.heard) parts.push({ type: 'vowel', target: it.target, got: null, score: 0, ok: false, msg: 'I couldn’t hear a long enough sound. Hold it for about 2 seconds.', syl: it.say });
+      else { track = ev.track; parts.push(vowelPart(it.target, ev.got, ev.score, false, it.say)); }
+    }
+    const res = finalize(parts, rec, dbg);
+    res.track = track;
+    return res;
+  }
+  function finalize(parts, rec, dbg) {
+    const scored = parts.filter((p) => p.type !== 'skip');
+    const score = scored.length ? Math.min(...scored.map((p) => p.score)) : 100;
+    let peak = 0, clip = 0;
+    for (let i = 0; i < rec.samples.length; i++) { const a = Math.abs(rec.samples[i]); if (a > peak) peak = a; if (a > 0.985) clip++; }
+    const notes = [];
+    if (clip > 40) notes.push('A little too loud — hold the phone a bit further away.');
+    else if (peak < 0.02 && rec.speech) notes.push('Very quiet — come a bit closer to the mic.');
+    const worst = scored.filter((p) => !p.ok).sort((a, b) => a.score - b.score)[0];
+    return { score, parts, msg: worst ? worst.msg : '', notes, dbg, rec };
+  }
+
+  // ================= visuals: background bubbles + particles =================
+  const COLORS = [['#ffd6f0', '#e9b8ff'], ['#d4ecff', '#b9c8ff'], ['#fff1c9', '#ffc9a8'], ['#d2fbef', '#a6e6ff'], ['#efe0ff', '#c5b4ff']];
+  const bg = $('#bg');
+  function spawnBubble(initial) {
+    const b = document.createElement('div');
+    b.className = 'bub';
+    const size = 26 + Math.random() * 70;
+    const [c1, c2] = COLORS[Math.floor(Math.random() * COLORS.length)];
+    b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random() * 96}%;--c1:${c1};--c2:${c2};animation-duration:${14 + Math.random() * 16}s;animation-delay:${initial ? -Math.random() * 25 : 0}s`;
+    b.addEventListener('pointerdown', (e) => {
+      if (b.classList.contains('pop')) return;
+      b.classList.add('pop');
+      Sfx.pop();
+      burst(e.clientX, e.clientY, c2, 10);
+      setTimeout(() => { b.remove(); spawnBubble(false); }, 260);
+    });
+    b.addEventListener('animationiteration', () => { b.style.left = Math.random() * 96 + '%'; });
+    bg.appendChild(b);
+  }
+  for (let i = 0; i < 13; i++) spawnBubble(true);
+
+  const fx = $('#fx'), fctx = fx.getContext('2d');
+  let parts = [], fxRunning = false;
+  function sizeFx() { const d = window.devicePixelRatio || 1; fx.width = innerWidth * d; fx.height = innerHeight * d; fctx.setTransform(d, 0, 0, d, 0, 0); }
+  sizeFx(); addEventListener('resize', sizeFx);
+  function burst(x, y, color, n = 16, kind = 'bubble') {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 4.5;
+      parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (kind === 'confetti' ? 3 : 1), r: kind === 'confetti' ? 5 + Math.random() * 5 : 3 + Math.random() * 7, life: 1, color: Array.isArray(color) ? color[i % color.length] : color, kind, rot: Math.random() * 6 });
+    }
+    if (!fxRunning) { fxRunning = true; requestAnimationFrame(stepFx); }
+  }
+  function stepFx() {
+    fctx.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter((p) => p.life > 0);
+    for (const p of parts) {
+      p.x += p.vx; p.y += p.vy; p.vy += p.kind === 'confetti' ? 0.18 : 0.05; p.vx *= 0.98; p.life -= p.kind === 'confetti' ? 0.008 : 0.022; p.rot += 0.15;
+      fctx.globalAlpha = Math.max(0, p.life);
+      if (p.kind === 'confetti') {
+        fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot); fctx.fillStyle = p.color; fctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); fctx.restore();
+      } else {
+        fctx.beginPath(); fctx.arc(p.x, p.y, p.r * (1.4 - p.life * 0.4), 0, Math.PI * 2);
+        fctx.fillStyle = p.color + '66'; fctx.fill();
+        fctx.lineWidth = 2; fctx.strokeStyle = p.color; fctx.stroke();
+      }
+    }
+    fctx.globalAlpha = 1;
+    if (parts.length) requestAnimationFrame(stepFx); else { fxRunning = false; fctx.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+  function celebrate(el, big) {
+    const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    burst(x, y, ['#8b6cff', '#ff7aa8', '#2ec4b6', '#ffb020'], big ? 26 : 16);
+    if (big) setTimeout(() => { for (let i = 0; i < 5; i++) burst(Math.random() * innerWidth, -10, ['#8b6cff', '#ff7aa8', '#2ec4b6', '#ffb020', '#22c58b'], 22, 'confetti'); }, 150);
+  }
+  function wobble(el) { if (!el) return; el.classList.remove('wobble'); void el.offsetWidth; el.classList.add('wobble'); }
+
+  let toastT = null;
+  function toast(msg, ms = 3200) {
+    let t = $('.toast');
+    if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+    t.innerHTML = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), ms);
+  }
+
+  // ================= vowel map =================
+  function VowelMap(canvas, target) {
+    const T = DSP.templates(cal());
+    const d = window.devicePixelRatio || 1;
+    const W = 400, H = 190;
+    canvas.width = W * d; canvas.height = H * d;
+    const g = canvas.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0);
+    const f2max = T.i.F2 * 1.2, f2min = T.u.F2 * 0.72;
+    const f1min = Math.min(T.i.F1, T.u.F1) * 0.62, f1max = Math.max(T.i.F1, T.u.F1) * 1.9;
+    const X = (f2) => 28 + ((Math.log(f2max) - Math.log(f2)) / (Math.log(f2max) - Math.log(f2min))) * (W - 56);
+    const Y = (f1) => 30 + ((Math.log(f1) - Math.log(f1min)) / (Math.log(f1max) - Math.log(f1min))) * (H - 60);
+    const R = ((W - 56) * 0.11) / (Math.log(f2max) - Math.log(f2min));
+    const zones = [
+      { k: 'i', label: 'I', em: '😁', col: '#ff7aa8' },
+      { k: 'y', label: 'U', em: '😗', col: '#8b6cff' },
+      { k: 'u', label: 'OU', em: '🕯️', col: '#2ec4b6' },
+    ];
+    let trail = [], shots = [], dot = null, t0 = performance.now(), raf = 0, alive = true;
+    function draw() {
+      if (!alive) return;
+      const t = (performance.now() - t0) / 1000;
+      g.clearRect(0, 0, W, H);
+      g.font = '600 12px Fredoka, system-ui'; g.fillStyle = '#b3a9cf'; g.textAlign = 'left';
+      g.fillText('◀ tongue forward', 10, H - 10); g.textAlign = 'right'; g.fillText('tongue back ▶', W - 10, H - 10);
+      for (const z of zones) {
+        const x = X(T[z.k].F2), y = Y(T[z.k].F1);
+        const isT = target && target.includes(z.k);
+        const pulse = isT ? 1 + 0.06 * Math.sin(t * 4) : 1;
+        const rr = R * pulse;
+        const grd = g.createRadialGradient(x - rr * 0.3, y - rr * 0.35, rr * 0.1, x, y, rr);
+        grd.addColorStop(0, '#ffffff'); grd.addColorStop(1, z.col + (isT ? '88' : '33'));
+        g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fillStyle = grd; g.fill();
+        g.lineWidth = isT ? 3 : 1.5; g.strokeStyle = z.col + (isT ? 'ff' : '66'); g.stroke();
+        g.textAlign = 'center'; g.font = '14px system-ui'; g.fillStyle = z.col; g.fillText(z.em, x, y - rr - 6);
+      }
+      // past shots
+      for (const s of shots) {
+        const x = X(s.F2), y = Y(s.F1);
+        g.beginPath(); g.arc(x, y, 5.5, 0, Math.PI * 2); g.fillStyle = s.ok ? '#22c58b' : '#ff5d7a'; g.fill();
+        g.lineWidth = 2; g.strokeStyle = '#fff'; g.stroke();
+      }
+      for (const z of zones) {
+        const isT = target && target.includes(z.k);
+        g.textAlign = 'center'; g.font = `700 ${isT ? 20 : 16}px Fredoka, system-ui`;
+        g.lineWidth = 4; g.strokeStyle = '#ffffffcc'; g.strokeText(z.label, X(T[z.k].F2), Y(T[z.k].F1) + 6);
+        g.fillStyle = z.col; g.fillText(z.label, X(T[z.k].F2), Y(T[z.k].F1) + 6);
+      }
+      // trail
+      trail = trail.filter((p) => t - p.t < 1.2);
+      for (const p of trail) {
+        const a = 1 - (t - p.t) / 1.2;
+        g.beginPath(); g.arc(X(p.F2), Y(p.F1), 4 + 3 * a, 0, Math.PI * 2); g.fillStyle = `rgba(45,35,70,${0.25 * a})`; g.fill();
+      }
+      if (dot && t - dot.t < 0.4) {
+        g.beginPath(); g.arc(X(dot.F2), Y(dot.F1), 11, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill();
+        g.lineWidth = 4; g.strokeStyle = '#2d2346'; g.stroke();
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    let ema = null;
+    return {
+      live(f) {
+        if (!f || isNaN(f.F1) || isNaN(f.F2) || !(f.voicing > 0.6)) return;
+        const F1 = Math.min(f1max, Math.max(f1min, f.F1)), F2 = Math.min(f2max, Math.max(f2min, f.F2));
+        ema = ema ? { F1: ema.F1 * 0.6 + F1 * 0.4, F2: ema.F2 * 0.6 + F2 * 0.4 } : { F1, F2 };
+        const t = (performance.now() - t0) / 1000;
+        dot = { ...ema, t }; trail.push({ ...ema, t });
+      },
+      reset() { ema = null; trail = []; dot = null; },
+      shot(F1, F2, ok) { if (!isNaN(F1) && !isNaN(F2)) shots.push({ F1: Math.min(f1max, Math.max(f1min, F1)), F2: Math.min(f2max, Math.max(f2min, F2)), ok }); if (shots.length > 6) shots.shift(); },
+      destroy() { alive = false; cancelAnimationFrame(raf); },
+    };
+  }
+
+  // ================= mouth illustration =================
+  function faceSVG(kind) {
+    // mouth shapes: wide smile (i), small round kiss (y), round forward (u), slightly open + throat (r)
+    const anim = {
+      iy: '<animate attributeName="rx" values="30;30;10;10;30" keyTimes="0;.3;.5;.85;1" dur="3.4s" repeatCount="indefinite"/><animate attributeName="ry" values="7;7;11;11;7" keyTimes="0;.3;.5;.85;1" dur="3.4s" repeatCount="indefinite"/>',
+      i: '<animate attributeName="rx" values="30;33;30" dur="1.6s" repeatCount="indefinite"/>',
+      mix: '<animate attributeName="rx" values="30;30;10;10;13;13;30" keyTimes="0;.2;.3;.55;.65;.9;1" dur="4.5s" repeatCount="indefinite"/><animate attributeName="ry" values="7;7;11;11;14;14;7" keyTimes="0;.2;.3;.55;.65;.9;1" dur="4.5s" repeatCount="indefinite"/>',
+      r: '<animate attributeName="ry" values="10;12;10" dur=".5s" repeatCount="indefinite"/>',
+    }[kind] || '';
+    const rx = { iy: 30, i: 30, mix: 30, r: 20 }[kind] || 26, ry = { iy: 7, i: 7, mix: 7, r: 10 }[kind] || 9;
+    const throat = kind === 'r' ? `<g stroke="#ff9f43" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M70 150 q15 -8 30 0"><animate attributeName="opacity" values="1;.2;1" dur=".45s" repeatCount="indefinite"/></path>
+        <path d="M64 160 q21 -10 42 0"><animate attributeName="opacity" values=".2;1;.2" dur=".45s" repeatCount="indefinite"/></path></g>
+        <path d="M70 117 q15 6 30 0" stroke="#ff7aa8" stroke-width="4" fill="none" stroke-linecap="round"/>` : '';
+    return `<svg class="face" viewBox="0 0 170 170" aria-hidden="true">
+      <defs><radialGradient id="fg" cx="35%" cy="30%"><stop offset="0" stop-color="#fff3c4"/><stop offset="1" stop-color="#ffd166"/></radialGradient></defs>
+      <circle cx="85" cy="80" r="66" fill="url(#fg)" stroke="#f5b942" stroke-width="3"/>
+      <circle cx="62" cy="66" r="7" fill="#2d2346"/><circle cx="108" cy="66" r="7" fill="#2d2346"/>
+      <circle cx="64" cy="63" r="2.2" fill="#fff"/><circle cx="110" cy="63" r="2.2" fill="#fff"/>
+      <ellipse cx="50" cy="90" rx="10" ry="6" fill="#ff9fb8" opacity=".6"/><ellipse cx="120" cy="90" rx="10" ry="6" fill="#ff9fb8" opacity=".6"/>
+      <ellipse cx="85" cy="104" rx="${rx}" ry="${ry}" fill="#7a2948" stroke="#c2185b" stroke-width="3">${anim}</ellipse>
+      ${throat}
+    </svg>`;
+  }
+
+  // ================= screens =================
+  let cleanup = [];
+  function mount(html) {
+    cleanup.forEach((f) => { try { f(); } catch (e) {} }); cleanup = [];
+    Mic.stopNow();
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    app.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  const starStr = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+  function lessonStars(L) {
+    const p = Store.data.prog[L.id];
+    if (!p || !p.best) return 0;
+    const keys = []; L.steps.forEach((s, si) => s.items.forEach((_, ii) => keys.push(si + ':' + ii)));
+    const avg = keys.reduce((s, k) => s + (p.best[k] || 0), 0) / keys.length;
+    return avg >= 85 ? 3 : avg >= 70 ? 2 : avg >= 35 ? 1 : 0;
+  }
+
+  function micError(e) {
+    const insecure = !window.isSecureContext;
+    toast(insecure ? 'The microphone needs a secure (https) page. Put the app online (e.g. Netlify) and open it from there.' : 'I can’t use the microphone. Please allow mic access in your browser settings and try again.', 6000);
+  }
+
+  // ---------- home ----------
+  function Home() {
+    const c = cal();
+    mount(`
+      <div class="top"><div class="logo">Bulles<span>🫧</span></div>
+        <button class="iconbtn" id="mute" title="Sound effects">${Store.data.muted ? '🔇' : '🔊'}</button></div>
+      <p class="tag">Your little French pronunciation coach</p>
+      <div class="card calib">
+        <div class="em">${c ? '🎙️' : '👋'}</div>
+        <div style="flex:1"><h3>${c ? 'Voice tuned' : 'First, let me learn your voice'}</h3>
+          <p>${c ? 'Ready to go. Redo it if you change device or mic.' : 'Three quick sounds, 20 seconds. It makes the feedback much more accurate.'}</p></div>
+        <button class="pill ${c ? 'ghost small' : ''}" id="cal">${c ? 'Redo' : 'Start'}</button>
+      </div>
+      <div class="lessons">
+        ${LESSONS.map((L) => `<button class="lesson" data-id="${L.id}" style="--col:${L.color};--soft:${L.soft}">
+          <div class="em">${L.emoji}</div><div class="t">${L.title}</div><div class="s">${L.sub}</div>
+          <div class="stars" style="color:${L.color}">${starStr(lessonStars(L))}</div></button>`).join('')}
+      </div>
+      <div class="foot">
+        <label class="toggle"><input type="checkbox" id="nums" ${Store.data.numbers ? 'checked' : ''}> Show the numbers (coach view)</label>
+        <button class="toggle" id="reset">↺ Reset progress</button>
+      </div>`);
+    $('#mute').onclick = () => { Store.data.muted = !Store.data.muted; Store.save(); $('#mute').textContent = Store.data.muted ? '🔇' : '🔊'; Sfx.tap(); };
+    $('#cal').onclick = () => { Sfx.tap(); Calibrate(); };
+    $('#nums').onchange = (e) => { Store.data.numbers = e.target.checked; Store.save(); };
+    $('#reset').onclick = () => {
+      const b = $('#reset');
+      if (b.dataset.sure) { Store.data.prog = {}; Store.save(); Home(); toast('Progress reset.'); }
+      else { b.dataset.sure = 1; b.textContent = 'Tap again to confirm'; }
+    };
+    app.querySelectorAll('.lesson').forEach((b) => b.onclick = () => {
+      Sfx.pop(); celebrate(b);
+      const L = LESSONS.find((x) => x.id === b.dataset.id);
+      if (!cal()) CalNudge(L); else Lesson(L);
+    });
+  }
+
+  function CalNudge(L) {
+    mount(`<div class="card center"><div class="big-emoji">🎙️</div>
+      <h2>Quick voice tune-up?</h2><p class="muted">Every voice is different. 20 seconds of “iii, aaa, ouuu” lets me judge <b>your</b> vowels properly.</p>
+      <div class="actions"><button class="pill" id="go">Tune my voice</button><button class="pill ghost" id="skip">Skip for now</button></div></div>`);
+    $('#go').onclick = () => Calibrate(L);
+    $('#skip').onclick = () => Lesson(L);
+  }
+
+  // ---------- calibration ----------
+  function Calibrate(thenLesson) {
+    const steps = [
+      { k: 'i', say: 'iiii', how: 'like in “s<b>ee</b>” — big smile 😁', model: 'i' },
+      { k: 'a', say: 'aaaa', how: 'like in “f<b>a</b>ther” — mouth open 😮', model: 'a' },
+      { k: 'u', say: 'ouuu', how: 'like in “f<b>oo</b>d” — round lips 🕯️', model: 'ou' },
+    ];
+    const res = {};
+    let idx = 0;
+    mount(`<div class="lhead"><button class="iconbtn" id="back">←</button><h2>Voice tune-up</h2></div>
+      <div class="card center" id="cc">
+        <div class="calsteps">${steps.map((s, i) => `<div class="cs" id="cs${i}">${s.k === 'u' ? 'ou' : s.k}</div>`).join('')}</div>
+        <div class="word" id="csay"></div><div class="en" id="chow"></div>
+        <div class="models"><button class="pill ghost small" id="cmodel">🔊 Hear it</button></div>
+        <div class="micwrap"><button class="mic" id="mic"><span class="ring"></span><span class="ring"></span>🎤</button>
+          <div class="level"><i id="lvl"></i></div><div class="miclabel" id="ml">Tap, then hold the sound for 2 seconds</div></div>
+      </div>`);
+    $('#back').onclick = () => Home();
+    const show = () => {
+      steps.forEach((s, i) => { $('#cs' + i).className = 'cs' + (i < idx ? ' done' : i === idx ? ' cur' : ''); });
+      $('#csay').textContent = steps[idx].say; $('#chow').innerHTML = steps[idx].how;
+    };
+    show();
+    $('#cmodel').onclick = () => speak(steps[idx].model);
+    $('#mic').onclick = async () => {
+      if (Mic.recording) { Mic.stopNow(); return; }
+      try { await Mic.ensure(); } catch (e) { micError(e); return; }
+      Sfx.ready(); await sleep(160);
+      $('#mic').classList.add('rec'); $('#ml').textContent = 'Listening… hold it';
+      const rec = await Mic.record({ maxSec: 3, minSec: 1.4, silenceStop: 0.5, onLive: (f) => { const l = $('#lvl'); if (l) l.style.width = f.level * 100 + '%'; } });
+      const m = $('#mic'); if (!m) return;
+      m.classList.remove('rec'); $('#lvl').style.width = '0';
+      const A = DSP.analyze(rec.samples, rec.fs);
+      const v = DSP.calibrationVowel(A);
+      if (!v) { wobble($('#cc')); Sfx.bad(); $('#ml').textContent = 'Hmm, I didn’t get a long sound. Try again — hold it for 2 seconds.'; return; }
+      res[steps[idx].k] = v;
+      Sfx.good(); celebrate($('#cs' + idx));
+      idx++;
+      if (idx < steps.length) { show(); $('#ml').textContent = 'Nice! Next sound 👉 tap and hold'; return; }
+      if (!DSP.validCalibration(res)) {
+        Sfx.meh(); idx = 0; show();
+        $('#ml').innerHTML = 'Those didn’t sound different enough. Let’s redo it — exaggerate! Big smile for “iii”, wide open “aaa”, round “ouuu”.';
+        wobble($('#cc')); return;
+      }
+      Store.data.cal = res; Store.save();
+      Sfx.great(); celebrate(null, true);
+      $('#cc').innerHTML = `<div class="big-emoji">🎉</div><h2>Voice tuned!</h2>
+        <p class="muted">Here’s your personal vowel map. The bubbles are where <b>your</b> I, U and OU should land.</p>
+        <div class="viz"><canvas class="map" id="map"></canvas></div>
+        ${Store.data.numbers ? `<div class="numbers">${JSON.stringify(res, (k, v) => typeof v === 'number' ? Math.round(v) : v)}</div>` : ''}
+        <div class="actions"><button class="pill" id="done">${thenLesson ? 'Start the lesson →' : 'Done'}</button></div>`;
+      const vm = VowelMap($('#map'), ['i', 'y', 'u']); cleanup.push(vm.destroy);
+      $('#done').onclick = () => (thenLesson ? Lesson(thenLesson) : Home());
+    };
+  }
+
+  // ---------- lesson ----------
+  function Lesson(L) {
+    document.documentElement.style.setProperty('--accent', L.color);
+    document.documentElement.style.setProperty('--soft', L.soft);
+    const flat = [];
+    L.steps.forEach((s, si) => s.items.forEach((it, ii) => flat.push({ s, si, ii, it, key: si + ':' + ii })));
+    const prog = (Store.data.prog[L.id] = Store.data.prog[L.id] || { best: {} });
+    const session = {};
+    let pos = -1; // -1 = tip
+
+    mount(`<div class="lhead"><button class="iconbtn" id="back">←</button><h2>${L.emoji} ${L.title}</h2>
+      <button class="iconbtn" id="mute">${Store.data.muted ? '🔇' : '🔊'}</button></div>
+      <div class="prog"><i id="bar"></i></div><div id="stage"></div>`);
+    $('#back').onclick = () => { resetAccent(); Home(); };
+    $('#mute').onclick = () => { Store.data.muted = !Store.data.muted; Store.save(); $('#mute').textContent = Store.data.muted ? '🔇' : '🔊'; };
+    const stage = $('#stage');
+    const setBar = () => { $('#bar').style.width = Math.max(3, ((pos + 1) / (flat.length + 1)) * 100) + '%'; };
+
+    function tip() {
+      setBar();
+      stage.innerHTML = `<div class="card tip">${faceSVG(L.tip.mouth)}<h2>${L.tip.title}</h2>
+        <ul class="tiplines">${L.tip.lines.map((l, i) => `<li style="animation-delay:${0.25 + i * 0.45}s">${l}</li>`).join('')}</ul>
+        <div class="actions"><button class="pill ghost" id="hear">🔊 Hear it</button><button class="pill" id="go">Let’s go! →</button></div></div>`;
+      $('#hear').onclick = () => speak(L.tip.model, true);
+      $('#go').onclick = () => { Sfx.pop(); next(); };
+    }
+
+    function next() {
+      pos++;
+      setBar();
+      if (pos >= flat.length) return summary();
+      const cur = flat[pos];
+      if (cur.ii === 0) {
+        // step intro bubble
+        stage.innerHTML = `<div class="card center"><div class="steplabel">Step ${cur.si + 1} of ${L.steps.length}</div>
+          <div class="big-emoji">${['🫧', '🐣', '🎯', '🌈', '🗣️'][cur.si % 5]}</div><h2 style="margin:6px 0 2px">${cur.s.title}</h2>
+          <p class="muted">${cur.s.items.length} ${cur.s.items.length > 1 ? 'challenges' : 'challenge'}</p>
+          <div class="actions"><button class="pill" id="go">Start</button></div></div>`;
+        $('#go').onclick = () => { Sfx.pop(); item(cur); };
+        Sfx.tap();
+      } else item(cur);
+    }
+
+    function record(key, score) {
+      prog.best[key] = Math.max(prog.best[key] || 0, score);
+      session[key] = Math.max(session[key] || 0, score);
+      Store.save();
+    }
+
+    function item(cur) {
+      const it = cur.it;
+      cleanup.forEach((f) => { try { f(); } catch (e) {} }); cleanup = [];
+      const label = `<div class="steplabel">${cur.s.title} · ${cur.ii + 1}/${cur.s.items.length}</div>`;
+      if (it.kind === 'sentence') return sentenceItem(cur, label);
+      const isMulti = it.kind === 'pair' || it.kind === 'triple';
+      const words = isMulti ? (it.kind === 'pair' ? [it.a, it.b] : it.words) : null;
+      const needsMap = it.kind === 'sustain' || it.kind === 'glide' || (isMulti ? words.some((w) => w.v) : !!it.v);
+      const needsR = it.kind === 'rsustain' || (isMulti ? words.some((w) => w.r) : !!it.r);
+      const targets = it.kind === 'sustain' ? [it.target] : it.kind === 'glide' ? ['i', 'y'] : isMulti ? [] : (it.v || []).filter((v) => v !== '*');
+      let wi = 0; // index inside multi
+      const multiRes = [];
+      let attempts = 0, last = null;
+
+      const promptHTML = () => {
+        if (isMulti) return `<div class="multi">${words.map((w, k) => `${k ? '<span class="arrow">›</span>' : ''}<div class="w ${k === wi ? 'cur' : k < wi ? 'done' : ''}" id="mw${k}">${w.w}<small>${w.en || ''}</small>${multiRes[k] ? `<span class="badge">${multiRes[k].score >= 70 ? '✅' : '❌'}</span>` : ''}</div>`).join('')}</div>
+          <div class="hint">${wi < words.length ? `Say: <b>${words[wi].w}</b>` : ''}</div>`;
+        const w = it.w || it.say;
+        return `<div class="word ${w.length > 9 ? 'long' : ''}">${w}</div><div class="en">${it.en ? '“' + it.en + '”' : ''}</div>${it.hint ? `<div class="hint">${it.hint}</div>` : ''}`;
+      };
+      stage.innerHTML = `<div class="card" id="card">${label}
+        <div class="prompt" id="prompt">${promptHTML()}</div>
+        <div class="models"><button class="pill ghost small" id="m1">🔊 Hear it</button><button class="pill ghost small" id="m2">🐢 Slowly</button></div>
+        ${needsMap ? '<div class="viz"><canvas class="map" id="map"></canvas><div class="vizcap">Your voice is the dark dot — aim for the glowing bubble ✨</div></div>' : ''}
+        ${needsR && !needsMap ? `<div class="viz rmeter" id="rm">${['french', 'english', 'rolled', 'weak'].map((k) => `<div class="rtype" data-k="${k}"><b>${{ french: '🦁', english: '👅', rolled: '🌀', weak: '🤫' }[k]}</b>${RNAME[k]}</div>`).join('')}</div>` : ''}
+        <div class="micwrap"><button class="mic" id="mic"><span class="ring"></span><span class="ring"></span>🎤</button>
+          <div class="level"><i id="lvl"></i></div><div class="miclabel" id="ml">Tap the bubble and speak</div></div>
+        <div class="result" id="res"></div></div>`;
+      const vm = needsMap ? VowelMap($('#map'), isMulti ? (words[0].v || []).filter((v) => v !== '*') : targets) : null;
+      if (vm) cleanup.push(vm.destroy);
+      const modelText = () => (isMulti ? words[wi] ? words[wi].w : words.map((w) => w.w).join(', ') : it.kind === 'rsustain' ? 'ra, ri, rou' : it.model || it.w);
+      $('#m1').onclick = () => speak(modelText());
+      $('#m2').onclick = () => speak(modelText(), true);
+      const setMapTarget = () => {
+        if (!vm || !isMulti) return;
+        // rebuild map with the current word's target
+        vm.destroy();
+        const nv = VowelMap($('#map'), (words[wi] ? words[wi].v || [] : []).filter((v) => v !== '*'));
+        cleanup.push(nv.destroy);
+        Object.assign(vm, nv);
+      };
+
+      $('#mic').onclick = async () => {
+        if (Mic.recording) { Mic.stopNow(); return; }
+        if ($('#mic').classList.contains('busy')) return;
+        try { await Mic.ensure(); } catch (e) { micError(e); return; }
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        Sfx.ready(); await sleep(170);
+        if (isMulti && wi >= words.length) { wi = 0; multiRes.length = 0; $('#prompt').innerHTML = promptHTML(); setMapTarget(); }
+        $('#res').innerHTML = '';
+        $('#mic').classList.add('rec'); $('#ml').textContent = 'Listening… 👂';
+        if (vm) vm.reset();
+        const sustained = it.kind === 'sustain' || it.kind === 'glide' || it.kind === 'rsustain';
+        const rec = await Mic.record({
+          maxSec: sustained ? 3.5 : 2.6, minSec: sustained ? 1.2 : 0.5, silenceStop: sustained ? 0.5 : 0.6,
+          onLive: (f) => { const l = $('#lvl'); if (l) l.style.width = f.level * 100 + '%'; if (vm) vm.live(f); },
+        });
+        const mic = $('#mic'); if (!mic) return;
+        mic.classList.remove('rec'); mic.classList.add('busy'); $('#lvl').style.width = '0';
+        $('#ml').textContent = 'Thinking… 🤔';
+        await sleep(30);
+        let r;
+        try {
+          if (sustained) r = evalSustainItem(it, rec);
+          else r = evalWord(isMulti ? words[wi] : it, rec);
+        } catch (e) { console.error(e); r = { score: 0, parts: [], msg: 'Oops, something went wrong analysing that. Try again.', notes: [], rec }; }
+        mic.classList.remove('busy');
+        last = r;
+        if (!rec.speech) { r.score = 0; r.msg = RFB.silent; }
+        // map shots
+        if (vm) {
+          if (r.track) r.track.filter((_, k) => k % 3 === 0).slice(-12).forEach((p) => vm.shot(p.F1, p.F2, r.score >= 70));
+          else if (r.dbg && r.dbg.vowels) r.dbg.vowels.filter((v) => v.f && v.t !== '*').forEach((v) => vm.shot(v.f[0], v.f[1], v.sc >= 70));
+        }
+        if (isMulti) {
+          multiRes[wi] = r;
+          wi++;
+          if (wi < words.length) {
+            $('#prompt').innerHTML = promptHTML();
+            setMapTarget();
+            if (r.score >= 70) Sfx.good(); else Sfx.meh();
+            $('#ml').innerHTML = r.score >= 70 ? `Nice! Now: <b>${words[wi].w}</b>` : `Hmm — keep going, now: <b>${words[wi].w}</b>`;
+            return;
+          }
+          $('#prompt').innerHTML = promptHTML();
+          const worst = multiRes.slice().sort((a, b) => a.score - b.score)[0];
+          const total = Math.min(...multiRes.map((x) => x.score));
+          r = { ...worst, score: total, multi: multiRes.slice(), words };
+        }
+        attempts++;
+        showResult(r);
+      };
+
+      function showResult(r) {
+        record(cur.key, r.score);
+        const good = r.score >= 70;
+        const col = r.score >= 85 ? 'var(--good)' : r.score >= 70 ? '#4cc38a' : r.score >= 45 ? 'var(--mid)' : 'var(--bad)';
+        const chips = [];
+        const addChips = (res, prefix) => {
+          for (const p of res.parts || []) {
+            if (p.type === 'skip') chips.push(`<div class="chip na">${prefix || ''}${p.syl}<small>·</small></div>`);
+            else if (p.type === 'vowel') chips.push(`<div class="chip ${p.ok ? 'ok' : 'no'}">${prefix || ''}${p.syl} ${p.ok ? '✓' : '✗'}<small>${p.ok ? VNAME[p.target] + ' ✔' : p.got ? 'heard ' + VNAME[p.got] : 'not heard'}</small></div>`);
+            else if (p.type === 'r') chips.push(`<div class="chip ${p.ok ? 'ok' : 'no'}">R ${p.ok ? '✓' : '✗'}<small>${RNAME[p.kind]}</small></div>`);
+          }
+        };
+        if (r.multi) r.multi.forEach((m, k) => chips.push(`<div class="chip ${m.score >= 70 ? 'ok' : 'no'}">${r.words[k].w} ${m.score >= 70 ? '✓' : '✗'}<small>${(m.parts || []).filter((p) => p.type === 'vowel').map((p) => p.got ? 'heard ' + VNAME[p.got] : 'not heard').join(' ') || (m.parts || []).filter((p) => p.type === 'r').map((p) => RNAME[p.kind]).join('')}</small></div>`));
+        else addChips(r);
+        // R meter highlight
+        const rp = (r.multi ? r.multi.flatMap((m) => m.parts || []) : r.parts || []).find((p) => p.type === 'r');
+        if (rp && $('#rm')) $('#rm').querySelectorAll('.rtype').forEach((el) => {
+          el.className = 'rtype' + (el.dataset.k === rp.kind ? ' on' + (rp.kind === 'french' ? '' : rp.kind === 'weak' ? ' midr' : ' badr') : '');
+        });
+        const verdict = r.score >= 85 ? pick(PRAISE) : good ? 'Good! 👍' : r.score >= 45 ? pick(MID) : pick(LOW);
+        const tipMsg = good ? (r.score >= 85 ? 'That’s exactly it. 💜' : 'Good — and it can be even cleaner.') + (r.msg ? '<br>' + r.msg : '') : r.msg || 'Listen to the model and try again.';
+        const canNext = good || attempts >= 3;
+        $('#res').innerHTML = `<div class="score" style="--sc:${col}">${r.score}</div>
+          <div class="verdict">${verdict}</div>
+          <div class="chips">${chips.join('')}</div>
+          <div class="fb ${good ? 'good' : ''}">💡 ${tipMsg}${r.notes && r.notes.length ? '<br><small>' + r.notes.join(' ') + '</small>' : ''}</div>
+          <div class="actions">
+            <button class="pill ghost small" id="me">👂 Hear me</button>
+            <button class="pill ghost small" id="again">🔁 Again</button>
+            ${canNext ? `<button class="pill" id="nx">${pos + 1 >= flat.length ? 'Finish 🏁' : 'Next →'}</button>` : `<button class="pill ghost small" id="skip">Skip</button>`}
+          </div>
+          ${Store.data.numbers ? `<div class="numbers">${esc(JSON.stringify(r.multi ? r.multi.map((m) => m.dbg) : r.dbg, (k, v) => (typeof v === 'number' ? Math.round(v * 100) / 100 : v)))}</div>` : ''}`;
+        $('#ml').textContent = good ? 'Tap 🎤 to do it again, or go next' : 'Tap 🎤 and try again';
+        const lastRec = r.multi ? null : r.rec;
+        $('#me').onclick = () => {
+          if (r.multi) { let t = 0; r.multi.forEach((m) => { setTimeout(() => playSamples(m.rec.samples, m.rec.fs), t); t += (m.rec.samples.length / m.rec.fs) * 1000 + 250; }); }
+          else if (lastRec) playSamples(lastRec.samples, lastRec.fs);
+        };
+        $('#again').onclick = () => $('#mic').click();
+        const nx = $('#nx') || $('#skip');
+        nx.onclick = () => { Sfx.pop(); next(); };
+        if (r.score >= 85) { Sfx.great(); celebrate($('.score'), false); }
+        else if (good) { Sfx.good(); celebrate($('.score'), false); }
+        else { Sfx.bad(); wobble($('#card')); }
+        setTimeout(() => { const el = $('#res'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 120);
+      }
+    }
+
+    function sentenceItem(cur, label) {
+      const it = cur.it;
+      const focus = new Set(it.focus.map((w) => norm(w)[0]));
+      const wordsHTML = (marks) => it.s.split(/\s+/).map((tok, k) => {
+        const n = norm(tok)[0];
+        const cls = (n && focus.has(n) ? 'f ' : '') + (marks ? (marks[k] === true ? 'sw ok' : marks[k] === false ? 'sw no' : 'sw') : 'sw');
+        return `<span class="${cls}">${tok}</span>`;
+      }).join(' ');
+      let attempts = 0;
+      stage.innerHTML = `<div class="card" id="card">${label}
+        <div class="sentence" id="sent">${wordsHTML()}</div><div class="en center">“${it.en}”</div>
+        <div class="hint center">Say the whole sentence. Colored words have your sounds!</div>
+        <div class="models"><button class="pill ghost small" id="m1">🔊 Hear it</button><button class="pill ghost small" id="m2">🐢 Slowly</button></div>
+        <div class="micwrap"><button class="mic" id="mic"><span class="ring"></span><span class="ring"></span>🎤</button>
+          <div class="miclabel" id="ml">${SR ? 'Tap and say the sentence' : 'Tap, say it, then compare with the model'}</div></div>
+        <div class="result" id="res"></div></div>`;
+      $('#m1').onclick = () => speak(it.s);
+      $('#m2').onclick = () => speak(it.s, true);
+      $('#mic').onclick = async () => {
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        if (Mic.recording) { Mic.stopNow(); return; }
+        $('#res').innerHTML = '';
+        if (SR) {
+          Sfx.ready(); await sleep(170);
+          Mic.release(); // free the mic for the browser's recogniser
+          $('#mic').classList.add('rec'); $('#ml').textContent = 'Listening… 👂';
+          const out = await recognize();
+          if (!$('#mic')) return;
+          $('#mic').classList.remove('rec');
+          if (!out.ok) {
+            if (out.error === 'not-allowed' || out.error === 'service-not-allowed' || out.error === 'network' || out.error === 'start') { selfCheck('The sentence checker isn’t available here, so let’s compare by ear.'); return; }
+            $('#ml').textContent = 'I didn’t catch that — tap and try again';
+            Sfx.meh(); wobble($('#card')); return;
+          }
+          attempts++;
+          const cmp = compareSentence(it.s, out.alts);
+          const toks = it.s.split(/\s+/);
+          // map word-level ok back to tokens (tokens may hold punctuation / apostrophes)
+          let wiIdx = 0; const marks = toks.map((tok) => { const n = norm(tok); if (!n.length) return null; const ok = n.every((_, k) => cmp.ok[wiIdx + k]); wiIdx += n.length; return ok; });
+          let focusMissed = 0; toks.forEach((tok, k) => { const n = norm(tok)[0]; if (n && focus.has(n) && marks[k] === false) focusMissed++; });
+          const score = Math.max(0, Math.round(cmp.score * 100 - focusMissed * 10));
+          $('#sent').innerHTML = wordsHTML(marks);
+          record(cur.key, score);
+          const good = score >= 70;
+          const col = score >= 85 ? 'var(--good)' : good ? '#4cc38a' : score >= 45 ? 'var(--mid)' : 'var(--bad)';
+          $('#res').innerHTML = `<div class="score" style="--sc:${col}">${score}</div>
+            <div class="verdict">${score >= 85 ? pick(PRAISE) : good ? 'Good! 👍' : pick(MID)}</div>
+            <div class="heard">A French ear heard: “${esc(cmp.alt)}”</div>
+            <div class="fb ${good ? 'good' : ''}">💡 ${good ? 'Understood! Red words (if any) are the ones to polish.' : 'The <u>red</u> words weren’t understood. Listen to the model (try 🐢), focus on those, and go again.'}</div>
+            <div class="actions"><button class="pill ghost small" id="again">🔁 Again</button>
+              ${good || attempts >= 3 ? `<button class="pill" id="nx">${pos + 1 >= flat.length ? 'Finish 🏁' : 'Next →'}</button>` : '<button class="pill ghost small" id="nx">Skip</button>'}</div>`;
+          $('#ml').textContent = 'Tap 🎤 to try again';
+          $('#again').onclick = () => $('#mic').click();
+          $('#nx').onclick = () => { Sfx.pop(); next(); };
+          if (good) { score >= 85 ? Sfx.great() : Sfx.good(); celebrate($('.score')); } else { Sfx.bad(); wobble($('#card')); }
+        } else selfCheck();
+      };
+      async function selfCheck(note) {
+        try { await Mic.ensure(); } catch (e) { micError(e); return; }
+        Sfx.ready(); await sleep(170);
+        $('#mic').classList.add('rec'); $('#ml').textContent = 'Listening… 👂';
+        const rec = await Mic.record({ maxSec: 6, minSec: 1, silenceStop: 0.9 });
+        if (!$('#mic')) return;
+        $('#mic').classList.remove('rec');
+        $('#res').innerHTML = `${note ? `<div class="heard">${note}</div>` : ''}
+          <div class="fb">🎧 Listen to yourself, then to the model. Do they match?</div>
+          <div class="actions"><button class="pill ghost small" id="me">👂 Hear me</button><button class="pill ghost small" id="mo">🔊 Model</button></div>
+          <div class="actions"><button class="pill" id="yes">😀 Sounds right</button><button class="pill ghost" id="no">🤔 Not yet</button></div>`;
+        $('#me').onclick = () => playSamples(rec.samples, rec.fs);
+        $('#mo').onclick = () => speak(it.s);
+        $('#yes').onclick = () => { record(cur.key, 80); Sfx.good(); celebrate($('#yes')); setTimeout(next, 450); };
+        $('#no').onclick = () => { record(cur.key, 40); $('#res').innerHTML = ''; $('#ml').textContent = 'Tap 🎤 and try again'; };
+      }
+    }
+
+    function summary() {
+      const st = lessonStars(L);
+      const tricky = [];
+      flat.forEach((f) => {
+        if ((session[f.key] || 0) < 70) {
+          const it = f.it;
+          tricky.push(it.w || it.say || it.s || (it.a ? it.a.w + ' / ' + it.b.w : it.words ? it.words.map((w) => w.w).join(' / ') : '?'));
+        }
+      });
+      stage.innerHTML = `<div class="card summary"><div class="big-emoji">${st >= 3 ? '🏆' : st === 2 ? '🎉' : '💪'}</div>
+        <h2>${st >= 3 ? 'Incroyable !' : st === 2 ? 'Bravo !' : 'Good practice!'}</h2>
+        <div class="bigstars" style="color:${L.color}">${[0, 1, 2].map((i) => `<span style="animation-delay:${0.3 + i * 0.25}s">${i < st ? '★' : '☆'}</span>`).join('')}</div>
+        ${tricky.length ? `<p class="muted">Words to keep practising:</p><div class="tricky">${tricky.map((t) => `<span class="chip no">${esc(t)}</span>`).join('')}</div>` : '<p class="muted">Every challenge passed. Ton accent est magnifique ! 💜</p>'}
+        <div class="actions"><button class="pill ghost" id="again">🔁 Practise again</button><button class="pill" id="home">🏠 Home</button></div></div>`;
+      Sfx.great(); celebrate(null, true);
+      $('#again').onclick = () => Lesson(L);
+      $('#home').onclick = () => { resetAccent(); Home(); };
+    }
+
+    tip();
+  }
+  function resetAccent() { document.documentElement.style.setProperty('--accent', '#8b6cff'); document.documentElement.style.setProperty('--soft', '#e9e3ff'); }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // unlock audio on first touch (iOS)
+  addEventListener('pointerdown', () => { try { audioCtx(); } catch (e) {} }, { once: true });
+  window.__bulles = { Store, Mic, DSP, LESSONS };
+  Home();
+})();
+</script>
+</body>
+</html>
